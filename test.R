@@ -15,6 +15,7 @@ df = read.csv("/Users/kisei.tanaka/Desktop/I_craterformis_AS.csv")
 
 df = df %>% filter(ISLAND %in% c("Tutuila", "Ofu & Olosega"))
 df = df %>% filter(ISLAND %in% c("Tutuila"))
+df = df %>% filter(OBS_YEAR != 2020)
 
 zone <- (floor((df$LONGITUDE[1] + 180)/6) %% 60) + 1
 xy_utm = as.data.frame(cbind(utm = project(as.matrix(df[, c("LONGITUDE", "LATITUDE")]), paste0("+proj=utm +units=km +zone=", zone))))
@@ -49,17 +50,14 @@ df %>%
 # df = add_utm_columns(df, ll_names = c("LONGITUDE", "LATITUDE"))
 df$depth = (df$MAX_DEPTH_M + df$MIN_DEPTH_M)/2
 
-# Build a mesh to implement the SPDE approach:
-mesh <- make_mesh(df, c("X", "Y"), cutoff = 0.1)
-plot(mesh)
-
 fit <- sdmTMB(
-  AdColCount ~ s(depth, k = 5),
-  reml = T,
+  AdColCount ~  0 + as.factor(OBS_YEAR) + s(depth, k = 5),
+  # reml = T,
+  # time = "OBS_YEAR",
   data = df, 
   mesh = rea_spde_coast,
   silent = F,
-  # control = sdmTMBcontrol(newton_loops = 1),
+  control = sdmTMBcontrol(newton_loops = 1),
   family = tweedie(link = "log")
 )
 
@@ -86,10 +84,20 @@ plot(xy_utm, pch = ".", bty = 'n')
 rm(xy_utm)
 grid$depth = grid$depth * -1
 
+grid_year = NULL
+
+for (y in 1:length(unique(df$OBS_YEAR))) {
+  
+  grid$OBS_YEAR = unique(df$OBS_YEAR)[y]
+  
+  grid_year = rbind(grid_year, grid)
+  
+}
+
 # Predict on the fitted data; see ?predict.sdmTMB
 p <- predict(fit)
 
-p1 = p %>% 
+p %>% 
   ggplot(aes(AdColCount, exp(est), fill = AdColCount)) + 
   geom_point(shape = 21, show.legend = F, size = 3, alpha = 0.8) + 
   labs(x = "Observation", y = "Prediction") + 
@@ -97,18 +105,19 @@ p1 = p %>%
   coord_fixed(ratio = 1)
 
 # Predict on new data:
-p <- predict(fit, newdata = grid)
+p <- predict(fit, newdata = grid_year)
 p$est = exp(p$est)
 p = p %>% subset(est <= max(df$AdColCount))
 head(p)
 
-p2 = p %>% 
+p %>% 
   ggplot(aes(LONGITUDE, LATITUDE, fill = est)) + 
   geom_raster() + 
   scale_fill_gradientn(colors = matlab.like(100), trans = "sqrt", "Est. AdColCount") + 
+  facet_grid(~OBS_YEAR) + 
   ggtitle("I_craterformis_AS") + 
   coord_fixed() + 
   theme(panel.background = element_rect(fill = "gray10"),
-        panel.grid = element_line(color = "gray20"))
+        panel.grid = element_line(color = "gray15"))
 
 
