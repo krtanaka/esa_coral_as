@@ -11,7 +11,8 @@ library(readr)
 library(ggpubr)
 library(tidyr)
 
-df = read.csv("/Users/kisei.tanaka/Desktop/I_craterformis_AS.csv")
+df = read.csv("I_craterformis_AS.csv")
+df = read.csv("A_globiceps_AS.csv")
 
 df = df %>% filter(ISLAND %in% c("Tutuila", "Ofu & Olosega"))
 df = df %>% filter(ISLAND %in% c("Tutuila"))
@@ -24,7 +25,7 @@ df = cbind(df, xy_utm)
 plot(xy_utm, pch = ".", bty = 'n')
 rm(xy_utm)
 
-load('/Users/kisei.tanaka/pifsc_efh/data/gis/MHI_islands_shp.RData')
+load('/Users/kisei.tanaka/pifsc_efh/data/MHI_islands_shp.RData')
 crs(ISL_bounds) = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
 ISL_this = ISL_bounds[which(ISL_bounds$ISLAND %in% toupper(df$ISLAND)),]
 ISL_this_utm = spTransform(ISL_this,CRS(paste0("+proj=utm +units=km +zone=",zone)))
@@ -116,7 +117,7 @@ p %>%
   scale_fill_gradientn(colors = matlab.like(100), trans = "sqrt", "Est. AdColCount") + 
   facet_grid(~OBS_YEAR) + 
   ggtitle("I_craterformis_AS") + 
-  coord_fixed() + 
+  # coord_fixed() + 
   theme(panel.background = element_rect(fill = "gray10"),
         panel.grid = element_line(color = "gray15"))
 
