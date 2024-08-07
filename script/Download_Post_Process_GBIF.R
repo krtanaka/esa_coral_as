@@ -11,9 +11,8 @@ library(ggplot2)
 
 rm(list = ls())
 
-species_list <- c(
-  "Acropora globiceps",
-  "Isopora crateriformis")
+species_list <- c("Acropora globiceps",
+                  "Isopora crateriformis")
 
 occ_df = NULL
 
