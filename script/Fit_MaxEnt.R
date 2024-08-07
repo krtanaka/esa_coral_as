@@ -16,14 +16,14 @@ library(doParallel)
 
 rm(list = ls())
 
-source("functions.R")
+source("script/functions.R")
 
 species_list <- c(
   "Acropora globiceps",
   "Isopora crateriformis"
 )[1]
 
-if (species_list == "Acropora globiceps") df = read_csv("A_globiceps_AS.csv") 
+if (species_list == "Acropora globiceps") df = read_csv("data/A_globiceps_AS.csv") 
 if (species_list == "Isopora crateriformis") df = read_csv("I_craterformis_AS.csv") 
 
 occ_df <- df %>%

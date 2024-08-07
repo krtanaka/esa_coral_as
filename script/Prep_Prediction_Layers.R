@@ -4,7 +4,7 @@ library(dplyr)
 rm(list = ls())
 select = dplyr::select
 
-df <- readRDS("eds_grid_output.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_output.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)
@@ -91,5 +91,5 @@ plot(eds[[1:12]])
 plot(eds[[13:24]])
 plot(eds[[25:31]])
 
-save(eds, file = "eds.rdata")
+save(eds, file = "data/eds.rdata")
 

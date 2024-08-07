@@ -8,30 +8,32 @@ library(ggspatial)
 
 # run "2.Prep_Prediction_Layers.R" first
 
-source("functions.R")
+source("script/functions.R")
 
 species_list <- c(
   "Acropora globiceps",
   "Isopora crateriformis"
-)[1]
+)[2]
 
-if (species_list == "Acropora globiceps") df = read_csv("A_globiceps_AS.csv") 
-if (species_list == "Isopora crateriformis") df = read_csv("I_craterformis_AS.csv") 
+load(paste0("output/maxent_result_", species_list, ".rda"))
 
-occ_df = df %>% 
-  filter(ISLAND == "Tutuila") %>% 
-  filter(AdColDen > 0) %>% 
-  dplyr::select(LONGITUDE, LATITUDE) %>% 
-  mutate(Scientific.Name = species_list) %>% 
-  as.data.frame()
+maxent_result$model@results %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column("rowname") %>% 
+  filter(grepl("contribution", rowname)) %>% 
+  mutate(rowname = gsub(".contribution", "", rowname)) %>% 
+  tibble::column_to_rownames("rowname") %>% 
+  rownames_to_column("rowname") %>% 
+  arrange(V1) %>%
+  mutate(rowname = factor(rowname, levels = rowname)) %>% 
+  ggplot(aes(V1, rowname, fill = V1)) + 
+  labs(x = "%", y = "", title = paste0("Variable Contribution for ", species_list)) +
+  geom_point(shape = 21, size = 5, show.legend = F) + 
+  scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt")
 
-load("maxent_result_Isopora crateriformis.rda")
-load("maxent_result_Acropora globiceps.rda")
+load("data/eds.rdata")
 
-plot(maxent_result$model)
-
-r <- predict(maxent_result$model, eds)
-plot(r, col = matlab.like(100))
+r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
 r = rasterToPoints(r) %>% as.data.frame()
 
 # use ggmap
@@ -50,16 +52,16 @@ map = ggmap::get_map(location = c(mean_lon, mean_lat),
                      force = T)
 ggmap(map) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
-                     size = 8,
-                     shape = 22, alpha = 0.8, crs = 4326) + 
-  scale_fill_gradientn(colors = matlab.like(100), "Predicted \nOccupancy \n(0-1)") + 
-  scale_color_gradientn(colors = matlab.like(100), "Predicted \nOccupancy \n(0-1)") + 
-  # ggtitle("Spatial distribution of U. stolonifera predicted habitat suitability") +
-  theme(legend.position = c(0.92, 0.81),
+                     size = 4,
+                     shape = 22, alpha = 0.7, crs = 4326) + 
+  scale_fill_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
+  scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
+  ggtitle(paste0("Predicted probability of presence for ", species_list)) +
+  theme(legend.position = c(0.1, 0.85),
         legend.background = element_blank(), # Makes the legend background transparent
         legend.box.background = element_blank(), # Makes the legend box background transparent
         legend.text = element_text(color = "white"), # Makes the legend text white
         legend.title = element_text(color = "white") # Makes the legend title white
   )
 
-ggsave(last_plot(), filename =  file.path("output/SDM_output.png"), height = 5.5, width = 5.5)
+ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), height = 5.5, width = 5.5)
