@@ -26,14 +26,19 @@ species_list <- c(
 if (species_list == "Acropora globiceps") df = read_csv("A_globiceps_AS.csv") 
 if (species_list == "Isopora crateriformis") df = read_csv("I_craterformis_AS.csv") 
 
-occ_df = df %>% 
-  filter(ISLAND == "Tutuila") %>% 
-  filter(AdColDen > 0) %>% 
-  dplyr::select(LONGITUDE, LATITUDE) %>% 
-  mutate(Scientific.Name = species_list) %>% 
+occ_df <- df %>%
+  filter(ISLAND == "Tutuila", AdColDen > 0) %>%
+  dplyr::select(LONGITUDE, LATITUDE) %>%
+  mutate(Scientific.Name = species_list) %>%
+  rename(Longitude = LONGITUDE, Latitude = LATITUDE) %>%
   as.data.frame()
 
-colnames(occ_df)[1:2] = c("Longitude", "Latitude")
+occ_df = rbind(read.csv("gbif_occurances_Acropora_globiceps.csv"), occ_df)
+
+occ_df %>% 
+  ggplot(aes(Longitude, Latitude)) + 
+  geom_point() + 
+  annotation_map(map =map_data("world"))  
 
 # Check how many occurrences subset for each spp.
 table(occ_df$Scientific.Name)

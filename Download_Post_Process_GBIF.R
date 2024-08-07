@@ -12,7 +12,6 @@ library(ggplot2)
 rm(list = ls())
 
 species_list <- c(
-  "Unomia stolonifera", 
   "Acropora globiceps",
   "Isopora crateriformis")
 
@@ -65,7 +64,7 @@ for (s in 1:length(species_list)) {
                   Longitude  = decimallongitude, 
                   Latitude  = decimallatitude,
                   Country = countrycode) %>%
-    dplyr::select(Scientific.Name, Longitude, Latitude) %>%
+    dplyr::select(Country, Scientific.Name, Longitude, Latitude) %>%
     na.omit() %>% 
     distinct()
   
