@@ -13,7 +13,7 @@ source("script/functions.R")
 species_list <- c(
   "Acropora globiceps",
   "Isopora crateriformis"
-)[2]
+)[1]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 
@@ -34,7 +34,7 @@ maxent_result$model@results %>%
 load("data/eds.rdata")
 
 r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
-r = rasterToPoints(r) %>% as.data.frame()
+r <- rasterToPoints(r) %>% as.data.frame()
 
 # use ggmap
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
