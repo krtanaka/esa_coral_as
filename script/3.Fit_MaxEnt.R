@@ -39,7 +39,7 @@ if (species_list == "Acropora globiceps") {
            Source = "GBIF") %>% 
     select(Longitude, Latitude, Scientific.Name, Source)
   
-  plot(ncrmp$Longitude, ncrmp$Latitude, col = 2, pch = 20)
+  plot(ncrmp$Longitude, ncrmp$Latitude, col = 2, pch = 20); maps::map(add = T)
   points(gbif$Longitude, gbif$Latitude, col = 4, pch = 20)
   
   occ_df = rbind(ncrmp, gbif)

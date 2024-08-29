@@ -5,6 +5,7 @@ library(dplyr)
 library(colorRamps)
 library(ggmap)
 library(ggspatial)
+library(tidyverse)
 
 # run "2.Prep_Prediction_Layers.R" first
 
@@ -13,7 +14,7 @@ source("script/functions.R")
 species_list <- c(
   "Acropora globiceps",
   "Isopora crateriformis"
-)[1]
+)[2]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 
@@ -45,23 +46,31 @@ coords <- coordinates(eds %>% stack())
 # Calculate the mean latitude and longitude
 mean_lat <- mean(coords[, 2], na.rm = TRUE)
 mean_lon <- mean(coords[, 1], na.rm = TRUE)
+min_lat <- min(coords[, 2])
+max_lat <- max(coords[, 2])
+min_lon <- min(coords[, 1])
+max_lon <- max(coords[, 1])
 
 map = ggmap::get_map(location = c(mean_lon, mean_lat),
                      maptype = "satellite",
                      zoom = 11,
-                     force = T)
-ggmap(map) +
+                     force = T, 
+                     color = "bw")
+
+ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
-                     size = 4,
+                     size = 6,
                      shape = 22, alpha = 0.7, crs = 4326) + 
   scale_fill_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
   scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
-  ggtitle(paste0("Predicted probability of presence for ", species_list)) +
-  theme(legend.position = c(0.1, 0.85),
+  scale_y_continuous(limits = c(min_lat, max_lat), "") + 
+  scale_x_continuous(limits = c(min_lon, max_lon), "") + 
+  ggtitle(paste0("Predicted presence probability for ", species_list)) +
+  theme(legend.position = c(0.05, 0.83),
         legend.background = element_blank(), # Makes the legend background transparent
         legend.box.background = element_blank(), # Makes the legend box background transparent
         legend.text = element_text(color = "white"), # Makes the legend text white
         legend.title = element_text(color = "white") # Makes the legend title white
   )
 
-ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), height = 5.5, width = 5.5)
+ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), height = 6, width = 10)
