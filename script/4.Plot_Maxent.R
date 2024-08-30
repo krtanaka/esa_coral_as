@@ -32,6 +32,8 @@ maxent_result$model@results %>%
   geom_point(shape = 21, size = 5, show.legend = F) + 
   scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt")
 
+ggsave(last_plot(), filename =  file.path(paste0("output/maxent_var_", species_list, ".png")), height = 7, width = 7)
+
 load("data/eds.rdata")
 
 r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
@@ -59,7 +61,7 @@ map = ggmap::get_map(location = c(mean_lon, mean_lat),
 
 ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
-                     size = 6,
+                     size = 7,
                      shape = 22, alpha = 0.7, crs = 4326) + 
   scale_fill_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
   scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
