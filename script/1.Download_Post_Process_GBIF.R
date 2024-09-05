@@ -44,7 +44,6 @@ for (s in 1:length(species_list)) {
     setNames(tolower(names(.))) %>% # set lowercase column names to work with CoordinateCleaner
     filter(occurrencestatus  == "PRESENT") %>%
     filter(!basisofrecord %in% c("FOSSIL_SPECIMEN","LIVING_SPECIMEN")) %>%
-    filter(if(species_list[s] %in% c("Acropora globiceps","Isopora crateriformis")) year >= 1900 else year >= 2000) %>%
     filter(coordinateprecision < 0.01 | is.na(coordinateprecision)) %>% 
     filter(coordinateuncertaintyinmeters < 10000 | is.na(coordinateuncertaintyinmeters)) %>%
     filter(!coordinateuncertaintyinmeters %in% c(301,3036,999,9999)) %>% 
@@ -63,7 +62,7 @@ for (s in 1:length(species_list)) {
                   Longitude  = decimallongitude, 
                   Latitude  = decimallatitude,
                   Country = countrycode) %>%
-    dplyr::select(Country, Scientific.Name, Longitude, Latitude) %>%
+    dplyr::select(Country, Scientific.Name, eventdate, year, month, day, Longitude, Latitude) %>%
     na.omit() %>% 
     distinct()
   
