@@ -54,7 +54,7 @@ run_maxent = function(occ_sf, env) {
     
     # Store maxent model
     maxent_result = list(enm = enmeval_df, model = sp_maxent_model)
-    save(maxent_result, file = paste0("maxent_result_", sp, ".rda"))
+    save(maxent_result, file = paste0("output/maxent_result_", sp, ".rda"))
     
   }
   

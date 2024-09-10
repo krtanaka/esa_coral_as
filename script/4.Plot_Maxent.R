@@ -62,18 +62,20 @@ map = ggmap::get_map(location = c(mean_lon, mean_lat),
 
 ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
-                     size = 7,
+                     size = 7.5,
                      shape = 22, alpha = 0.7, crs = 4326) + 
+  annotate("text", x = -170.84, y =  -14.23,
+           label = paste0(species_list, "\nred. occurance probability"),
+           hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
   scale_fill_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
   scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
-  scale_y_continuous(limits = c(min_lat, max_lat), "") + 
-  scale_x_continuous(limits = c(min_lon, max_lon), "") + 
-  ggtitle(paste0("Predicted ", species_list, " occurance probability")) +
-  theme(legend.position = c(0.05, 0.83),
+  scale_y_continuous(limits = c(-14.38, -14.23), "") +
+  scale_x_continuous(limits = c(-170.84, -170.55), "") +
+  theme(legend.position = c(0.95, 0.22),
         legend.background = element_blank(), # Makes the legend background transparent
         legend.box.background = element_blank(), # Makes the legend box background transparent
         legend.text = element_text(color = "white"), # Makes the legend text white
         legend.title = element_text(color = "white") # Makes the legend title white
   )
 
-ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), height = 5, width = 10)
+ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), height = 4.5, width = 8)
