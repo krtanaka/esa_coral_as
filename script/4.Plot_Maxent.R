@@ -28,11 +28,12 @@ maxent_result$model@results %>%
   arrange(V1) %>%
   mutate(rowname = factor(rowname, levels = rowname)) %>% 
   ggplot(aes(V1, rowname, fill = V1)) + 
-  labs(x = "%", y = "", title = paste0("Variable Contribution for ", species_list)) +
+  # labs(x = "%", y = "", title = paste0("Variable Contribution for\n ", species_list)) +
+  labs(x = "%", y = "", title = "Variable Contribution") +
   geom_point(shape = 21, size = 5, show.legend = F) + 
   scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt")
 
-ggsave(last_plot(), filename =  file.path(paste0("output/maxent_var_", species_list, ".png")), height = 7, width = 7)
+ggsave(last_plot(), filename =  file.path(paste0("output/maxent_var_", species_list, ".png")), height = 5, width = 6)
 
 load("data/eds.rdata")
 
@@ -67,7 +68,7 @@ ggmap(map, darken = c(0.5, "black")) +
   scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
   scale_y_continuous(limits = c(min_lat, max_lat), "") + 
   scale_x_continuous(limits = c(min_lon, max_lon), "") + 
-  ggtitle(paste0("Predicted presence probability for ", species_list)) +
+  ggtitle(paste0("Predicted ", species_list, " occurance probability")) +
   theme(legend.position = c(0.05, 0.83),
         legend.background = element_blank(), # Makes the legend background transparent
         legend.box.background = element_blank(), # Makes the legend box background transparent
@@ -75,4 +76,4 @@ ggmap(map, darken = c(0.5, "black")) +
         legend.title = element_text(color = "white") # Makes the legend title white
   )
 
-ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), height = 6, width = 10)
+ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), height = 5, width = 10)

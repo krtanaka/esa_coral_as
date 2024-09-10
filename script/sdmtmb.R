@@ -2,7 +2,7 @@ library(sdmTMB)
 library(sdmTMBextra)
 library(dplyr)
 library(ggplot2)
-library(rgdal)
+# library(rgdal)
 library(colorRamps)
 library(patchwork)
 library(raster)
@@ -13,19 +13,24 @@ library(tidyr)
 
 rm(list = ls())
 
-df = read.csv("I_craterformis_AS.csv"); hist(df$AdColDen)
-df = read.csv("A_globiceps_AS.csv"); hist(df$AdColDen)
+sp = c("I_craterformis", "A_globiceps")[1]
+
+# Use paste to construct the file path dynamically
+df = read.csv(paste0("data/", sp, "_AS.csv"))
 
 df = df %>% filter(ISLAND %in% c("Tutuila", "Ofu & Olosega"))
 df = df %>% filter(ISLAND %in% c("Tutuila"))
 df = df %>% filter(OBS_YEAR != 2020)
+df$lon = df$LONGITUDE
+df$lat = df$LATITUDE
 
-zone <- (floor((df$LONGITUDE[1] + 180)/6) %% 60) + 1
-xy_utm = as.data.frame(cbind(utm = project(as.matrix(df[, c("LONGITUDE", "LATITUDE")]), paste0("+proj=utm +units=km +zone=", zone))))
-colnames(xy_utm) = c("X", "Y")
-df = cbind(df, xy_utm)
-plot(xy_utm, pch = ".", bty = 'n')
-rm(xy_utm)
+zone <- (floor((df$lon[1] + 180)/6) %% 60) + 1
+coords <- df[,c("lon", "lat")]
+coordinates(coords) <- ~lon + lat
+sf_coords <- st_as_sf(df, coords = c("lon", "lat"), crs = 4326)
+sf_coords_utm <- st_transform(sf_coords, crs = sprintf("+proj=utm +zone=%d +datum=WGS84 units=km", zone))
+df$X <- st_coordinates(sf_coords_utm)[,1]
+df$Y <- st_coordinates(sf_coords_utm)[,2]
 
 load('/Users/kisei.tanaka/pifsc_efh/data/MHI_islands_shp.RData')
 crs(ISL_bounds) = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
@@ -44,11 +49,6 @@ norm_i = rea_spde_coast$normal_triangles
 points(rea_spde_coast$spde$mesh$loc[,1], rea_spde_coast$spde$mesh$loc[,2], pch = ".", col = "black")
 points(rea_spde_coast$mesh_sf$V1[bar_i], rea_spde_coast$mesh_sf$V2[bar_i], col = "red", pch = 20, cex = 0.5)
 points(rea_spde_coast$mesh_sf$V1[norm_i], rea_spde_coast$mesh_sf$V2[norm_i], col = "blue", pch = 20, cex = 0.5)
-
-df %>% 
-  ggplot(aes(LONGITUDE, LATITUDE, fill = AdColCount, size = AdColCount)) + 
-  geom_point(shape = 21,  alpha = 0.5) + 
-  facet_grid(~ANALYSIS_YEAR)
 
 # df = add_utm_columns(df, ll_names = c("LONGITUDE", "LATITUDE"))
 df$depth = (df$MAX_DEPTH_M + df$MIN_DEPTH_M)/2
@@ -79,12 +79,13 @@ grid[grid <= -30] <- NA
 
 grid = grid %>% rasterToPoints() %>% as.data.frame()
 colnames(grid) = c("LONGITUDE", "LATITUDE", "depth")
+coords <- df[,c("LONGITUDE", "LATITUDE")]
+coordinates(coords) <- ~LONGITUDE + LATITUDE
+sf_coords <- st_as_sf(grid, coords = c("LONGITUDE", "LATITUDE"), crs = 4326)
+sf_coords_utm <- st_transform(sf_coords, crs = sprintf("+proj=utm +zone=%d +datum=WGS84 units=km", zone))
+grid$X <- st_coordinates(sf_coords_utm)[,1]
+grid$Y <- st_coordinates(sf_coords_utm)[,2]
 # grid = add_utm_columns(grid, ll_names = c("LONGITUDE", "LATITUDE"))
-xy_utm = as.data.frame(cbind(utm = project(as.matrix(grid[, c("LONGITUDE", "LATITUDE")]), paste0("+proj=utm +units=km +zone=", zone))))
-colnames(xy_utm) = c("X", "Y")
-grid = cbind(grid, xy_utm)
-plot(xy_utm, pch = ".", bty = 'n')
-rm(xy_utm)
 grid$depth = grid$depth * -1
 
 grid_year = NULL
@@ -113,14 +114,69 @@ p$est = exp(p$est)
 p = p %>% subset(est <= max(df$AdColCount))
 head(p)
 
-p %>% 
-  ggplot(aes(LONGITUDE, LATITUDE, fill = est)) + 
-  geom_raster() + 
-  scale_fill_gradientn(colors = matlab.like(100), trans = "sqrt", "Est. AdColCount") + 
-  facet_grid(~OBS_YEAR) + 
-  ggtitle("I_craterformis_AS") + 
-  # coord_fixed() + 
-  theme(panel.background = element_rect(fill = "gray10"),
-        panel.grid = element_line(color = "gray15"))
+dfi = p %>% 
+  # mutate(lon = round(LONGITUDE, 2),
+  # lat = round(LATITUDE, 2)) %>%
+  mutate(lon = round(LONGITUDE, 3),
+         lat = round(LATITUDE, 3),
+         year = OBS_YEAR) %>%
+  group_by(lon, lat, year) %>% 
+  summarise(est = mean(est, na.rm = T)
+            # AdColCount = log(AdColCount + 1)
+  )
+
+p1 = ggmap(map) +
+  geom_spatial_point(data = dfi %>% filter(year == "2015"), aes(lon, lat, 
+                                                  fill = est,
+                                                  color = est), 
+                     shape = 21, 
+                     size = 0.5,
+                     alpha = 0.8, crs = 4326) + 
+  annotate("text", x = min(df$lon), y = max(df$lat), label = paste0(sp, " 2015"), 
+           hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") + 
+  scale_y_continuous(limits = c(min(df$lat), max(df$lat)), "") +
+  scale_x_continuous(limits = c(min(df$lon), max(df$lon)), "") +
+  scale_color_gradientn(colours = matlab.like(100), trans = "sqrt", "Est. AdColCount", limits = c(0, 150))  +
+  scale_fill_gradientn(colors = matlab.like(100), trans = "sqrt", "Est. AdColCount", limits = c(0, 150)) + 
+  theme_minimal() + 
+  theme(legend.position = c(0.9, 0.2),
+        legend.background = element_blank(),             # Transparent background
+        legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
+        legend.text = element_text(color = "white", face = "bold"),  # White and bold text
+        legend.title = element_text(color = "white", face = "bold"))
+
+p2 = ggmap(map) +
+  geom_spatial_point(data = dfi %>% filter(year == "2023"), aes(lon, lat, 
+                                                                fill = est,
+                                                                color = est), 
+                     shape = 21, 
+                     size = 0.5,
+                     alpha = 0.8, crs = 4326) + 
+  annotate("text", x = min(df$lon), y = max(df$lat), label = paste0(sp, " 2023"),  
+           hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") + 
+  scale_y_continuous(limits = c(min(df$lat), max(df$lat)), "") +
+  scale_x_continuous(limits = c(min(df$lon), max(df$lon)), "") +
+  scale_color_gradientn(colours = matlab.like(100), trans = "sqrt", "Est. AdColCount", limits = c(0, 150))  +
+  scale_fill_gradientn(colors = matlab.like(100), trans = "sqrt", "Est. AdColCount", limits = c(0, 150)) + 
+  theme_minimal() + 
+  theme(legend.position = c(0.9, 0.2),
+        legend.background = element_blank(),             # Transparent background
+        legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
+        legend.text = element_text(color = "white", face = "bold"),  # White and bold text
+        legend.title = element_text(color = "white", face = "bold"))
+
+p1 / p2
+
+ggsave(last_plot(), filename =  file.path("output/sdmtmb.png"), height = 10, width = 11)
+
+# p %>% 
+#   ggplot(aes(LONGITUDE, LATITUDE, fill = est)) + 
+#   geom_raster() + 
+#   scale_fill_gradientn(colors = matlab.like(100), trans = "sqrt", "Est. AdColCount") + 
+#   facet_grid(~OBS_YEAR) + 
+#   ggtitle("I_craterformis_AS") + 
+#   # coord_fixed() + 
+#   theme(panel.background = element_rect(fill = "gray10"),
+#         panel.grid = element_line(color = "gray15"))
 
 
