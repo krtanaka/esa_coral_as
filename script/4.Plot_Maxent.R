@@ -14,7 +14,7 @@ source("script/functions.R")
 species_list <- c(
   "Acropora globiceps",
   "Isopora crateriformis"
-)[2]
+)[1]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 
@@ -34,6 +34,14 @@ maxent_result$model@results %>%
   scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt")
 
 ggsave(last_plot(), filename =  file.path(paste0("output/maxent_var_", species_list, ".png")), height = 5, width = 6)
+
+auc = maxent_result$model@results %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column("rowname") %>% 
+  filter(grepl("Training.AUC", rowname)) %>% 
+  select(V1) %>% 
+  as.numeric() %>% 
+  round(2)
 
 load("data/eds.rdata")
 
@@ -64,13 +72,13 @@ ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
                      size = 7.5,
                      shape = 22, alpha = 0.7, crs = 4326) + 
-  annotate("text", x = -170.84, y =  -14.23,
-           label = paste0(species_list, "\nred. occurance probability"),
+  annotate("text", x = -170.85, y =  -14.21,
+           label = paste0(species_list, "\npred. occurance probability\nAUC=",auc),
            hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
   scale_fill_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
   scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
-  scale_y_continuous(limits = c(-14.38, -14.23), "") +
-  scale_x_continuous(limits = c(-170.84, -170.55), "") +
+  scale_y_continuous(limits = c(-14.39, -14.21), "") +
+  scale_x_continuous(limits = c(-170.85, -170.52), "") +
   theme(legend.position = c(0.95, 0.22),
         legend.background = element_blank(), # Makes the legend background transparent
         legend.box.background = element_blank(), # Makes the legend box background transparent

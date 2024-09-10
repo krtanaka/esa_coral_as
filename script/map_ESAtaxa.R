@@ -19,6 +19,8 @@ p = list()
 # Loop through species list
 for (s in sp_list) {
   
+  latin = ifelse(s == "I_craterformis", "Isopora crateriformis", "Acropora globiceps")
+  
   # Read in data for each species
   df = read.csv(paste0("data/", s, "_AS.csv"))
   
@@ -54,14 +56,14 @@ for (s in sp_list) {
                                       color = AdColCount, # Map color to AdColCount
                                       size = AdColCount), 
                        shape = 21, alpha = 0.8, crs = 4326) + 
-    annotate("text", x = min(df$lon), y = max(df$lat), label = s, 
-             hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") + 
-    scale_y_continuous(limits = c(min(df$lat), max(df$lat)), "") +
-    scale_x_continuous(limits = c(min(df$lon), max(df$lon)), "") +
+    annotate("text", x = -170.8375, y = -14.23039, label = latin, 
+             hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
+    scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
+    scale_x_continuous(limits = c(-170.8375, -170.508), "") +
     scale_color_gradient(low = "yellow", high = "red", guide = "legend") +  # Define color gradient
     scale_fill_gradient(low = "yellow", high = "red", guide = "legend") +   # Define fill gradient
     theme_minimal() + 
-    theme(legend.position = c(0.9, 0.2),
+    theme(legend.position = c(0.92, 0.22),
           legend.background = element_blank(),             # Transparent background
           legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
@@ -69,7 +71,7 @@ for (s in sp_list) {
   
   print(pp)
   
-  ggsave(last_plot(), filename =  file.path(paste0("output/ncrmp_", s, ".png")), height = 5, width = 11)
+  ggsave(last_plot(), filename =  file.path(paste0("output/ncrmp_", s, ".png")), height = 5, width = 10)
   
   p[[s]] = pp
 }

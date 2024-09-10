@@ -48,7 +48,8 @@ if (species_list == "Acropora globiceps") {
     select(Longitude, Latitude, Scientific.Name, Source)
   
   # Combine both datasets
-  occ_df <- bind_rows(ncrmp, gbif)
+  # occ_df <- bind_rows(ncrmp, gbif)
+  occ_df <- bind_rows(ncrmp)
   
 } else {
   
@@ -65,7 +66,8 @@ if (species_list == "Acropora globiceps") {
     select(Longitude, Latitude, Scientific.Name, Source)
   
   # Combine both datasets
-  occ_df <- bind_rows(ncrmp, gbif)
+  # occ_df <- bind_rows(ncrmp, gbif)
+  occ_df <- bind_rows(ncrmp)
   
 }
 
@@ -79,10 +81,12 @@ ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = occ_df, aes(Longitude, Latitude, fill = Source, color = Source),
                      size = 4,
                      shape = 21, alpha = 0.7, crs = 4326) +
-  annotate("text", x = -170.84, y =  -14.23, label = "NCRMP & GBIF",
+  annotate("text", x = -170.84, y =  -14.23, 
+           label = "NCRMP",
+           # label = "NCRMP & GBIF",
            hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
-  scale_y_continuous(limits = c(-14.38, -14.23), "") +
-  scale_x_continuous(limits = c(-170.84, -170.55), "") +
+  scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
+  scale_x_continuous(limits = c(-170.8375, -170.508), "") +
   theme_minimal() +
   theme(legend.position = c(0.9, 0.15),
         legend.background = element_blank(),             # Transparent background
