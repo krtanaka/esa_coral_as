@@ -1,9 +1,3 @@
-# https://docs.ropensci.org/rgbif/articles/getting_occurrence_data.html
-# https://data-blog.gbif.org/post/gbif-filtering-guide/
-
-# install.packages("usethis")
-# usethis::edit_r_environ()
-
 library(dplyr)
 library(ggplot2)
 library(readr)
@@ -32,6 +26,14 @@ for (s in 1:length(species_list)) {
     summarise(y = mean(y, na.rm = T),
               y = ifelse(y > 0, "present", "absent"))
   
+  df = dfi %>%
+    filter(y == "present") %>% 
+    mutate(Scientific.Name = species, 
+           Source = "NPS") %>% 
+    dplyr::select(Longitude, Latitude, Scientific.Name, Source)
+  
+  readr::write_csv(df, file = paste0("data/nps_occurances_", species, ".csv"))
+  
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
   
   # Get map for the given coordinates
@@ -51,8 +53,8 @@ for (s in 1:length(species_list)) {
                                        alpha = y,
                                        size = y),  # Map size to y
                        shape = 21, crs = 4326, show.legend = F) +
-    scale_fill_manual(values = c("absent" = "white", "present" = "red")) +  # Set colors
-    scale_color_manual(values = c("absent" = "white", "present" = "red")) + 
+    scale_fill_manual(values = c("absent" = "yellow", "present" = "red")) +  # Set colors
+    scale_color_manual(values = c("absent" = "yellow", "present" = "red")) + 
     scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.9)) +  # Dim absent, full opacity for present
     scale_size_manual(values = c("absent" = 2, "present" = 4)) +  # Smaller for absent, larger for present
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
@@ -68,6 +70,5 @@ for (s in 1:length(species_list)) {
           legend.title = element_text(color = "white", face = "bold"))
   
   ggsave(last_plot(), file = paste0("data/nps_occurances_", species, ".png"), height = 6, width = 8)
-  readr::write_csv(df, file = paste0("data/nps_occurances_", species, ".csv"))
   
 }

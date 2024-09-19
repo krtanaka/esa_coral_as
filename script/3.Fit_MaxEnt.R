@@ -30,7 +30,7 @@ source("script/functions.R")
 species_list <- c(
   "Acropora globiceps",
   "Isopora crateriformis"
-)[1]
+)[2]
 
 # Select species-specific data and process accordingly
 if (species_list == "Acropora globiceps") {
@@ -47,9 +47,14 @@ if (species_list == "Acropora globiceps") {
     mutate(Scientific.Name = species_list, Source = "GBIF") %>%
     select(Longitude, Latitude, Scientific.Name, Source)
   
+  # Load NPS data
+  nps <- read_csv("data/nps_occurances_Acropora globiceps.csv") %>%
+    mutate(Scientific.Name = species_list, Source = "NPS") %>%
+    select(Longitude, Latitude, Scientific.Name, Source)
+  
   # Combine both datasets
-  # occ_df <- bind_rows(ncrmp, gbif)
-  occ_df <- bind_rows(ncrmp)
+  occ_df <- bind_rows(ncrmp, gbif, nps)
+  # occ_df <- bind_rows(ncrmp)
   
 } else {
   
@@ -65,36 +70,40 @@ if (species_list == "Acropora globiceps") {
     mutate(Scientific.Name = species_list, Source = "GBIF") %>%
     select(Longitude, Latitude, Scientific.Name, Source)
   
+  # Load NPS data
+  nps <- read_csv("data/nps_occurances_Isopora crateriformis.csv") %>%
+    mutate(Scientific.Name = species_list, Source = "NPS") %>%
+    select(Longitude, Latitude, Scientific.Name, Source)
+  
   # Combine both datasets
-  # occ_df <- bind_rows(ncrmp, gbif)
-  occ_df <- bind_rows(ncrmp)
+  occ_df <- bind_rows(ncrmp, gbif, nps)
+  # occ_df <- bind_rows(ncrmp)
   
 }
 
 map = ggmap::get_map(location = c(mean(ncrmp$Longitude), mean(ncrmp$Latitude)),
                      maptype = "satellite",
                      zoom = 11,
-                     color = "bw",
+                     # color = "bw",
                      force = T)
 
 ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = occ_df, aes(Longitude, Latitude, fill = Source, color = Source),
-                     size = 4,
-                     shape = 21, alpha = 0.7, crs = 4326) +
-  annotate("text", x = -170.84, y =  -14.23, 
-           label = "NCRMP",
-           # label = "NCRMP & GBIF",
+                     size = 3,
+                     shape = 21, alpha = 0.8, crs = 4326) +
+  annotate("text", x = -170.8375, y =  -14.23039, 
+           label = species_list,
            hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
   scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
   scale_x_continuous(limits = c(-170.8375, -170.508), "") +
   theme_minimal() +
-  theme(legend.position = c(0.9, 0.15),
+  theme(legend.position = c(0.9, 0.2),
         legend.background = element_blank(),             # Transparent background
         legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
         legend.text = element_text(color = "white", face = "bold"),  # White and bold text
         legend.title = element_text(color = "white", face = "bold"))
 
-ggsave(last_plot(), filename =  file.path(paste0("output/ncrmp_gbif_", species_list, ".png")), height = 4.5, width = 8)
+ggsave(last_plot(), filename =  file.path(paste0("output/ncrmp_gbif_nps", species_list, ".png")), height = 4, width = 8.5)
 
 # Check how many occurrences subset for each spp.
 table(occ_df$Scientific.Name)

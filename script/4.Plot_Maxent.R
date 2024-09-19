@@ -73,7 +73,7 @@ ggmap(map, darken = c(0.5, "black")) +
                      size = 7.5,
                      shape = 22, alpha = 0.7, crs = 4326) + 
   annotate("text", x = -170.85, y =  -14.21,
-           label = paste0(species_list, "\npred. occurance probability\nAUC=",auc),
+           label = paste0(species_list, "\nPred. Occ. Prob.\nAUC = ",auc),
            hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
   scale_fill_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
   scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 

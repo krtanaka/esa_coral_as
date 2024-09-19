@@ -115,7 +115,7 @@ for (s in 1:length(species_list)) {
     dplyr::select(Scientific.Name, Longitude, Latitude) %>%
     na.omit() %>% 
     distinct() %>% 
-    mutate(source = "OBIS")
+    mutate(Source = "OBIS")
   
   gbif <- gbif %>% 
     dplyr::rename(Scientific.Name = species,
@@ -124,29 +124,28 @@ for (s in 1:length(species_list)) {
     dplyr::select(Scientific.Name, Longitude, Latitude) %>%
     na.omit() %>% 
     distinct() %>% 
-    mutate(source = "GBIF")
+    mutate(Source = "GBIF")
   
   df = rbind(gbif, obis) %>% 
     distinct()
   
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
-  map = ggmap::get_map(location = c(-170.7325, -14.3258),
+  
+  map = ggmap::get_map(location = c(mean(df$Latitude), mean(df$Longitude)),
                        maptype = "satellite",
-                       zoom = 10,
+                       zoom = 1,
                        color = "bw",
                        force = TRUE)
   
   ggmap(map) +
     geom_spatial_point(data = df, aes(Longitude, Latitude, 
-                                      fill = source,  
-                                      color = source),  # Map size to y
+                                      fill = Source,  
+                                      color = Source),  # Map size to y
                        shape = 21, crs = 4326) +
-    # scale_fill_manual(values = c("absent" = "white", "present" = "red")) +  # Set colors
-    # scale_color_manual(values = c("absent" = "white", "present" = "red")) + 
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
-    scale_x_continuous(limits = c(-170.8375, -170.508), "") +
-    annotate("text", x = -170.7243, y = -14.22946, label = paste0(species, "\1980-2024\nSource = GBIF & OBIS"), 
+    # scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
+    scale_x_continuous(limits = c(-180, 180), "") +
+    annotate("text", x = -170.8375, y = -14.23039, label = paste0(species, "\n1980-2024\nSource = GBIF & OBIS"), 
              hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
     theme_minimal() + 
     theme(legend.position = c(0.92, 0.22),
@@ -155,12 +154,36 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, ".png"), height = 6, width = 15)
-  readr::write_csv(df, file = paste0("data/occurances_", species, ".csv"))
+  
+  map = ggmap::get_map(location = c(-170.7325, -14.3258),
+                       maptype = "satellite",
+                       zoom = 1,
+                       color = "bw",
+                       force = TRUE)
+  
+  ggmap(map) +
+    geom_spatial_point(data = df, aes(Longitude, Latitude, 
+                                      fill = Source,  
+                                      color = Source),  # Map size to y
+                       shape = 21, crs = 4326) +
+    coord_sf(crs = 4326) +    # Use coord_sf to address the warning
+    # scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
+    # scale_x_continuous(limits = c(-170.8375, -170.508), "") +
+    annotate("text", x = -170.8375, y = -14.23039, label = paste0(species, "\n1980-2024\nSource = GBIF & OBIS"), 
+             hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
+    theme_minimal() + 
+    theme(legend.position = c(0.92, 0.22),
+          legend.background = element_blank(),             # Transparent background
+          legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
+          legend.text = element_text(color = "white", face = "bold"),  # White and bold text
+          legend.title = element_text(color = "white", face = "bold"))
+  
+  ggsave(last_plot(), file = paste0("data/GBIF_OBIS_occurances_", species, ".png"), height = 6, width = 15)
+  readr::write_csv(df, file = paste0("data/GBIF_OBIS_occurances_", species, ".csv"))
   
   occ_df = rbind(df, occ_df)
   
 }
 
 close(pb)
-readr::write_csv(occ_df, file = "data/occurances_multi.csv")
+readr::write_csv(occ_df, file = "data/GBIF_OBIS_occurances_multi.csv")
