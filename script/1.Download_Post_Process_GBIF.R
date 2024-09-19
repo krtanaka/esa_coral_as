@@ -20,8 +20,6 @@ species_list <- c("Acropora globiceps",
 
 occ_df = NULL
 
-world_sf <- ne_countries(scale = "medium", returnclass = "sf")
-
 pb <- txtProgressBar(min = 0, max = length(species_list), style = 3)
 
 for (s in 1:length(species_list)) {
@@ -131,77 +129,31 @@ for (s in 1:length(species_list)) {
   df = rbind(gbif, obis) %>% 
     distinct()
   
-  df$range = "Global Occurrences"
+  ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
+  map = ggmap::get_map(location = c(-170.7325, -14.3258),
+                       maptype = "satellite",
+                       zoom = 10,
+                       color = "bw",
+                       force = TRUE)
   
-  # Focus on the central 80% of the occupied range
-  df_80 <- df %>%
-    filter(
-      between(Longitude, quantile(Longitude, 0.10, na.rm = TRUE), quantile(Longitude, 0.90, na.rm = TRUE)) &
-        between(Latitude, quantile(Latitude, 0.10, na.rm = TRUE), quantile(Latitude, 0.90, na.rm = TRUE))
-    ) %>% 
-    mutate(range = "Central 80% Range")
-  
-  # focus on the central 50% of the occupied range
-  df_50 <- df %>%
-    filter(
-      between(Longitude, quantile(Longitude, 0.25, na.rm = TRUE), quantile(Longitude, 0.75, na.rm = TRUE)) &
-        between(Latitude, quantile(Latitude, 0.25, na.rm = TRUE), quantile(Latitude, 0.75, na.rm = TRUE))
-    ) %>% 
-    mutate(range = "Central 50% Range")
-  
-  df = rbind(df, rbind(df_50, df_80))
-  
-  range_counts <- table(df$range)
-  
-  df_sf <- st_as_sf(df, coords = c("Longitude", "Latitude"), crs = 4326)
-  
-  labels <- c(
-    'Global Occurrences' = paste0('Global Occurrences (n=', range_counts['Global Occurrences'], ')'),
-    'Central 80% Range' = paste0('Central 80% Range (n=', range_counts['Central 80% Range'], ')'),
-    'Central 50% Range' = paste0('Central 50% Range (n=', range_counts['Central 50% Range'], ')')
-  )
-  
-  facet_labels <- c(
-    "Global Occurrences" = paste0("Global Occurrences (n=", range_counts['Global Occurrences'], ")"), 
-    "Central 80% Range" = paste0("Central 80% Range (n=", range_counts['Central 80% Range'], ")"), 
-    "Central 50% Range" = paste0("Central 50% Range (n=", range_counts['Central 50% Range'], ")")
-  )
-  
-  p1 = ggplot() +
-    geom_sf(data = world_sf, fill = "grey80", color = "grey60") +  # World map
-    geom_sf(data = df_sf, fill = "red", size = 3, shape = 21, alpha = 0.5) +  # Your data points
-    coord_sf(crs = "+proj=robin") +  # Robinson projection
-    theme_minimal() +
-    facet_wrap(~range, ncol = 3, labeller = labeller(range = facet_labels)) +  # Custom facet titles
-    scale_fill_discrete(name = "Range") +  # Custom legend labels for fill
-    theme(legend.position = "bottom",
-          legend.title = element_blank())
-  
-  dfi = df %>% 
-    dplyr::select(Longitude, Latitude, source) %>% 
-    distinct()
-  
-  source_counts <- table(dfi$source)
-  
-  labels <- c(
-    'GBIF' = paste0('GBIF (n=', source_counts['GBIF'], ')'),
-    'OBIS' = paste0('OBIS (n=', source_counts['OBIS'], ')')
-  )
-  
-  facet_labels <- c(
-    "GBIF" = paste0("GBIF (n=", source_counts['GBIF'], ")"), 
-    "OBIS" = paste0("OBIS (n=", source_counts['OBIS'], ")")
-  )
-  
-  p2 = ggplot() +
-    geom_sf(data = world_sf, fill = "grey80", color = "grey60") +  # World map
-    geom_sf(data = df_sf, fill = "red", size = 3, shape = 21, alpha = 0.5) +  # Your data points
-    coord_sf(crs = "+proj=robin") +  # Robinson projection
-    theme_minimal() +
-    facet_wrap(~source , ncol = 2, labeller = labeller(source = facet_labels)) +  # Custom facet titles
-    theme(legend.position = "bottom")
-  
-  p2/p1
+  ggmap(map) +
+    geom_spatial_point(data = df, aes(Longitude, Latitude, 
+                                      fill = source,  
+                                      color = source),  # Map size to y
+                       shape = 21, crs = 4326) +
+    # scale_fill_manual(values = c("absent" = "white", "present" = "red")) +  # Set colors
+    # scale_color_manual(values = c("absent" = "white", "present" = "red")) + 
+    coord_sf(crs = 4326) +    # Use coord_sf to address the warning
+    scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
+    scale_x_continuous(limits = c(-170.8375, -170.508), "") +
+    annotate("text", x = -170.7243, y = -14.22946, label = paste0(species, "\1980-2024\nSource = GBIF & OBIS"), 
+             hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
+    theme_minimal() + 
+    theme(legend.position = c(0.92, 0.22),
+          legend.background = element_blank(),             # Transparent background
+          legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
+          legend.text = element_text(color = "white", face = "bold"),  # White and bold text
+          legend.title = element_text(color = "white", face = "bold"))
   
   ggsave(last_plot(), file = paste0("data/occurances_", species, ".png"), height = 6, width = 15)
   readr::write_csv(df, file = paste0("data/occurances_", species, ".csv"))

@@ -19,6 +19,8 @@ p = list()
 # Loop through species list
 for (s in sp_list) {
   
+  s = "I_craterformis"
+  
   latin = ifelse(s == "I_craterformis", "Isopora crateriformis", "Acropora globiceps")
   
   # Read in data for each species

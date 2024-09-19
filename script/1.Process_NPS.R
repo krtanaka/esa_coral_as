@@ -51,14 +51,14 @@ for (s in 1:length(species_list)) {
                                        alpha = y,
                                        size = y),  # Map size to y
                        shape = 21, crs = 4326, show.legend = F) +
-    scale_fill_manual(values = c("absent" = "gray90", "present" = "red")) +  # Set colors
+    scale_fill_manual(values = c("absent" = "white", "present" = "red")) +  # Set colors
     scale_color_manual(values = c("absent" = "white", "present" = "red")) + 
-    scale_alpha_manual(values = c("absent" = 0.5, "present" = 0.9)) +  # Dim absent, full opacity for present
+    scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.9)) +  # Dim absent, full opacity for present
     scale_size_manual(values = c("absent" = 2, "present" = 4)) +  # Smaller for absent, larger for present
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
     scale_y_continuous(limits = c(-14.28128 , -14.22946), "") +
     scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
-    annotate("text", x = -170.7243, y = -14.22946, label = paste0(species, "\n2007-2019\nn=", sum_p), 
+    annotate("text", x = -170.7243, y = -14.22946, label = paste0(species, "\n2007-2019\nSource = NPS\nn = ", sum_p), 
              hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
     theme_minimal() + 
     theme(legend.position = c(0.92, 0.22),
