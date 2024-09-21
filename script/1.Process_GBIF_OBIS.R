@@ -129,35 +129,36 @@ for (s in 1:length(species_list)) {
   df = rbind(gbif, obis) %>% 
     distinct()
   
+  dfi = df %>% 
+    dplyr::select(Longitude, Latitude, Source) %>% 
+    distinct() %>% 
+    st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326)
+  
+  source_counts <- table(dfi$Source)
+  
+  labels <- c(
+    'GBIF' = paste0('GBIF (n=', source_counts['GBIF'], ')'),
+    'OBIS' = paste0('OBIS (n=', source_counts['OBIS'], ')')
+  )
+  
+  facet_labels <- c(
+    "GBIF" = paste0("GBIF (n=", source_counts['GBIF'], ")"), 
+    "OBIS" = paste0("OBIS (n=", source_counts['OBIS'], ")")
+  )
+  
+  p1 = ggplot() +
+    geom_sf(data = world_sf, fill = "grey80", color = "grey60") +  # World map
+    geom_sf(data = df_sf, fill = "red", size = 3, shape = 21, alpha = 0.5) +  # Your data points
+    coord_sf(crs = "+proj=robin") +  # Robinson projection
+    theme_minimal() +
+    facet_wrap(~Source, ncol = 2, labeller = labeller(Source = facet_labels)) +  # Custom facet titles
+    theme(legend.position = "bottom")
+  
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
-  
-  map = ggmap::get_map(location = c(mean(df$Latitude), mean(df$Longitude)),
-                       maptype = "satellite",
-                       zoom = 1,
-                       color = "bw",
-                       force = TRUE)
-  
-  ggmap(map) +
-    geom_spatial_point(data = df, aes(Longitude, Latitude, 
-                                      fill = Source,  
-                                      color = Source),  # Map size to y
-                       shape = 21, crs = 4326) +
-    coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    # scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
-    scale_x_continuous(limits = c(-180, 180), "") +
-    annotate("text", x = -170.8375, y = -14.23039, label = paste0(species, "\n1980-2024\nSource = GBIF & OBIS"), 
-             hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
-    theme_minimal() + 
-    theme(legend.position = c(0.92, 0.22),
-          legend.background = element_blank(),             # Transparent background
-          legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
-          legend.text = element_text(color = "white", face = "bold"),  # White and bold text
-          legend.title = element_text(color = "white", face = "bold"))
-  
   
   map = ggmap::get_map(location = c(-170.7325, -14.3258),
                        maptype = "satellite",
-                       zoom = 1,
+                       zoom = 11,
                        color = "bw",
                        force = TRUE)
   
@@ -167,10 +168,11 @@ for (s in 1:length(species_list)) {
                                       color = Source),  # Map size to y
                        shape = 21, crs = 4326) +
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    # scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
-    # scale_x_continuous(limits = c(-170.8375, -170.508), "") +
-    annotate("text", x = -170.8375, y = -14.23039, label = paste0(species, "\n1980-2024\nSource = GBIF & OBIS"), 
-             hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
+    annotate("text", x = -170.8375, y = -14.23039, 
+             label = paste0(species, "\n1980-2024\nSource = GBIF & OBIS"), 
+             hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") + 
+    scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
+    scale_x_continuous(limits = c(-170.8375, -170.508), "") +
     theme_minimal() + 
     theme(legend.position = c(0.92, 0.22),
           legend.background = element_blank(),             # Transparent background
@@ -178,8 +180,8 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/GBIF_OBIS_occurances_", species, ".png"), height = 6, width = 15)
-  readr::write_csv(df, file = paste0("data/GBIF_OBIS_occurances_", species, ".csv"))
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis.png"), height = 4, width = 8.5)
+  readr::write_csv(df, file = paste0("data/occurances_", species, "_gbif_obis.csv"))
   
   occ_df = rbind(df, occ_df)
   

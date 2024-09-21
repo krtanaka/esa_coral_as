@@ -32,7 +32,7 @@ for (s in 1:length(species_list)) {
            Source = "NPS") %>% 
     dplyr::select(Longitude, Latitude, Scientific.Name, Source)
   
-  readr::write_csv(df, file = paste0("data/nps_occurances_", species, ".csv"))
+  readr::write_csv(df, file = paste0("data/occurances_", species, "_nps.csv"))
   
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
   
