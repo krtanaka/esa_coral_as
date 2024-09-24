@@ -23,7 +23,7 @@ species_list <- c("Acropora globiceps", "Isopora crateriformis")
 
 for (s in 1:length(species_list)) {
   
-  # s = 1
+  # s = 2
   
   species = species_list[s]
   

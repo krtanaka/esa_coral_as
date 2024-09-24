@@ -22,6 +22,7 @@ for (s in 1:length(species_list)) {
   if (s == 2) df = read_csv("data/original_data/I_craterformis_AS.csv")
   
   dfi = df %>% 
+    filter(ISLAND == "Tutuila") %>% 
     mutate(y = ifelse(AdColCount > 0, 1, 0),
            Longitude = LONGITUDE,
            Latitude = LATITUDE) %>% 
@@ -64,7 +65,7 @@ for (s in 1:length(species_list)) {
     scale_y_continuous(limits = range(dfi$Latitude), "") +
     scale_x_continuous(limits = range(dfi$Longitude), "") +
     annotate("text", x = min(dfi$Longitude), y = max(dfi$Latitude), 
-             label = paste0(species, "\n2015-2023\nSource: expanded NCRMP\nn = ", sum_p), 
+             label = paste0(species, "\n2015-2023\nSource: NCRMP\nn = ", sum_p), 
              hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") + 
     theme_minimal() + 
     theme(legend.position = c(0.92, 0.22),
@@ -73,6 +74,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_expanded.png"), height = 6, width = 8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_NCRMP.png"), width = 8)
   
 }
