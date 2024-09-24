@@ -4,7 +4,7 @@ library(dplyr)
 rm(list = ls())
 select = dplyr::select
 
-df <- readRDS("data/eds_grid_output.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_for_prediction.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)
