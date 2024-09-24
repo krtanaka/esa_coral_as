@@ -32,12 +32,12 @@ pb <- txtProgressBar(min = 0, max = length(species_list), style = 3)
 
 for (s in 1:length(species_list)) {
   
-  # s = 2
+  # s = 1
   
   max_uncertainty <- 5000  # Adjust this value based on your needs
   
   species = species_list[s]
-  species = gsub(" ", "_", species)
+  # species = gsub(" ", "_", species)
   
   setTxtProgressBar(pb, s)
   

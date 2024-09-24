@@ -41,10 +41,10 @@ for (s in 1:length(species_list)) {
   df = dfi %>%
     filter(y == "present") %>% 
     mutate(Scientific.Name = species, 
-           Source = "Expanded") %>% 
+           Source = "CoralBelt") %>% 
     dplyr::select(Longitude, Latitude, Scientific.Name, Source)
   
-  readr::write_csv(df, file = paste0("data/occurances_", species, "_CoralBelt.csv"))
+  readr::write_csv(df, file = paste0("data/occurances_", species, "_coralbelt.csv"))
   
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
   
@@ -82,6 +82,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_CoralBelt.png"), width = 8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_coralbelt.png"), width = 8)
   
 }

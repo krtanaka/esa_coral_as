@@ -69,6 +69,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_NPS.png"), height = 6)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_nps.png"), height = 6)
   
 }

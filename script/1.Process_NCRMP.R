@@ -36,7 +36,7 @@ for (s in 1:length(species_list)) {
            Source = "NCRMP") %>% 
     dplyr::select(Longitude, Latitude, Scientific.Name, Source)
   
-  readr::write_csv(df, file = paste0("data/occurances_", species, "_NCRMP.csv"))
+  readr::write_csv(df, file = paste0("data/occurances_", species, "_ncrmp.csv"))
   
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
   
@@ -74,6 +74,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_NCRMP.png"), width = 8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_ncrmp.png"), width = 8)
   
 }
