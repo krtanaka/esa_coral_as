@@ -58,8 +58,8 @@ for (s in 1:length(species_list)) {
     scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.9)) +  # Dim absent, full opacity for present
     scale_size_manual(values = c("absent" = 2, "present" = 4)) +  # Smaller for absent, larger for present
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    scale_y_continuous(limits = c(-14.28128 , -14.22946), "") +
-    scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
+    scale_y_continuous(limits =  range(dfi$Latitude), "") +
+    scale_x_continuous(limits =  range(dfi$Longitude), "") +
     annotate("text", x = -170.7243, y = -14.22946, label = paste0(species, "\n2007-2019\nSource = NPS\nn = ", sum_p), 
              hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
     theme_minimal() + 
@@ -69,6 +69,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/nps_occurances_", species, ".png"), height = 6, width = 8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_NPS.png"), height = 6)
   
 }

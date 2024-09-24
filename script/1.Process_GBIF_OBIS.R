@@ -32,7 +32,7 @@ pb <- txtProgressBar(min = 0, max = length(species_list), style = 3)
 
 for (s in 1:length(species_list)) {
   
-  # s = 1
+  # s = 2
   
   max_uncertainty <- 5000  # Adjust this value based on your needs
   
@@ -154,15 +154,17 @@ for (s in 1:length(species_list)) {
     "OBIS" = paste0("OBIS (n=", source_counts['OBIS'], ")")
   )
   
-  p1 = ggplot() +
-    geom_sf(data = world_sf, fill = "grey80", color = "grey60") +  # World map
-    geom_sf(data = dfi, fill = "red", size = 3, shape = 21, alpha = 0.5) +  # Your data points
-    coord_sf(crs = "+proj=robin") +  # Robinson projection
+  ggplot() +
+    geom_sf(data = world_sf, fill = "grey80", color = "grey60") +
+    geom_sf(data = dfi, fill = "red", size = 3, shape = 21, alpha = 0.5) + 
+    coord_sf(crs = "+proj=robin") +
     theme_minimal() +
-    facet_wrap(~Source, ncol = 2, labeller = labeller(Source = facet_labels)) +  # Custom facet titles
+    facet_wrap(~Source, ncol = 2, labeller = labeller(Source = facet_labels)) +
     theme(legend.position = "bottom")
   
-  p2 = ggmap(map) +
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_global.png"), width = 10)
+  
+  ggmap(map) +
     geom_spatial_point(data = df, 
                        aes(Longitude, Latitude, 
                            fill = Source,  
@@ -182,13 +184,7 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  p1
-  
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_global.png"), height = 5)
-  
-  p2
-  
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_local.png"), height = 5)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_local.png"), width = 8)
   
   readr::write_csv(df, file = paste0("data/occurances_", species, "_gbif_obis.csv"))
   
