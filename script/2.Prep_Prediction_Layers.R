@@ -86,7 +86,16 @@ for (v in 6:36) {
 
 }
 
+anth <- rast("data/sed_export.tif")
+anth <- terra::resample(anth, rast(eds))
+names(anth) = "sed_export"
+
+crs(eds) <- crs(anth)
+
+eds = c(eds, anth)
+
 eds = raster::stack(eds)
+
 plot(eds[[1:12]])
 plot(eds[[13:24]])
 plot(eds[[25:31]])

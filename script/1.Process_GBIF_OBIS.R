@@ -20,11 +20,13 @@ species_list <- c("Acropora globiceps",
 
 occ_df = NULL
 
+world_sf <- ne_countries(scale = "medium", returnclass = "sf")
+
 pb <- txtProgressBar(min = 0, max = length(species_list), style = 3)
 
 for (s in 1:length(species_list)) {
   
-  # s = 1
+  # s = 2
   
   max_uncertainty <- 5000  # Adjust this value based on your needs
   
@@ -148,18 +150,18 @@ for (s in 1:length(species_list)) {
   
   p1 = ggplot() +
     geom_sf(data = world_sf, fill = "grey80", color = "grey60") +  # World map
-    geom_sf(data = df_sf, fill = "red", size = 3, shape = 21, alpha = 0.5) +  # Your data points
+    geom_sf(data = dfi, fill = "red", size = 3, shape = 21, alpha = 0.5) +  # Your data points
     coord_sf(crs = "+proj=robin") +  # Robinson projection
     theme_minimal() +
-    facet_wrap(~Source, ncol = 2, labeller = labeller(Source = facet_labels)) +  # Custom facet titles
+    facet_wrap(~Source, ncol = 1, labeller = labeller(Source = facet_labels)) +  # Custom facet titles
     theme(legend.position = "bottom")
   
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
   
   map = ggmap::get_map(location = c(-170.7325, -14.3258),
                        maptype = "satellite",
-                       zoom = 11,
-                       color = "bw",
+                       zoom = 10,
+                       # color = "bw",
                        force = TRUE)
   
   ggmap(map) +

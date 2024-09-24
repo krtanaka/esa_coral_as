@@ -43,12 +43,12 @@ if (species_list == "Acropora globiceps") {
     rename(Longitude = LONGITUDE, Latitude = LATITUDE)
   
   # Load GBIF data
-  gbif <- read_csv("data/gbif_occurances_Acropora_globiceps.csv") %>%
+  gbif <- read_csv("data/occurances_Acropora_globiceps_gbif_obis.csv") %>%
     mutate(Scientific.Name = species_list, Source = "GBIF") %>%
     select(Longitude, Latitude, Scientific.Name, Source)
   
   # Load NPS data
-  nps <- read_csv("data/nps_occurances_Acropora globiceps.csv") %>%
+  nps <- read_csv("data/occurances_Acropora globiceps_nps.csv") %>%
     mutate(Scientific.Name = species_list, Source = "NPS") %>%
     select(Longitude, Latitude, Scientific.Name, Source)
   
@@ -66,12 +66,12 @@ if (species_list == "Acropora globiceps") {
     rename(Longitude = LONGITUDE, Latitude = LATITUDE)
   
   # Load GBIF data for Isopora crateriformis
-  gbif <- read_csv("data/gbif_occurances_Isopora_crateriformis.csv") %>%
+  gbif <- read_csv("data/occurances_Isopora_crateriformis_gbif_obis.csv") %>%
     mutate(Scientific.Name = species_list, Source = "GBIF") %>%
     select(Longitude, Latitude, Scientific.Name, Source)
   
   # Load NPS data
-  nps <- read_csv("data/nps_occurances_Isopora crateriformis.csv") %>%
+  nps <- read_csv("data/occurances_Isopora crateriformis_nps.csv") %>%
     mutate(Scientific.Name = species_list, Source = "NPS") %>%
     select(Longitude, Latitude, Scientific.Name, Source)
   
