@@ -112,6 +112,7 @@ load("data/eds.rdata")
 
 v = usdm::vifstep(terra::rast(eds), th = 5)
 eds = raster::subset(eds, v@results$Variables); names(eds)
+eds <- dropLayer(eds, "sed_export")
 
 plot(eds, col = matlab.like(100))
 

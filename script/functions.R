@@ -30,7 +30,7 @@ run_maxent = function(occ_sf, env) {
                                   partitions = "randomkfold", 
                                   # partition.settings = list(kfolds = 2),
                                   algorithm = "maxnet", 
-                                  n.bg = 100,
+                                  # n.bg = 100,
                                   # parallel = T,
                                   # numCores = detectCores()/2,
                                   updateProgress = T,

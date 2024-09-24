@@ -15,10 +15,16 @@ library(patchwork)
 
 rm(list = ls())
 
+ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
+
+map = ggmap::get_map(location = c(-170.7325, -14.3258),
+                     maptype = "satellite",
+                     zoom = 11,
+                     # color = "bw",
+                     force = TRUE)
+
 species_list <- c("Acropora globiceps",
                   "Isopora crateriformis")
-
-occ_df = NULL
 
 world_sf <- ne_countries(scale = "medium", returnclass = "sf")
 
@@ -26,7 +32,7 @@ pb <- txtProgressBar(min = 0, max = length(species_list), style = 3)
 
 for (s in 1:length(species_list)) {
   
-  # s = 2
+  # s = 1
   
   max_uncertainty <- 5000  # Adjust this value based on your needs
   
@@ -153,28 +159,22 @@ for (s in 1:length(species_list)) {
     geom_sf(data = dfi, fill = "red", size = 3, shape = 21, alpha = 0.5) +  # Your data points
     coord_sf(crs = "+proj=robin") +  # Robinson projection
     theme_minimal() +
-    facet_wrap(~Source, ncol = 1, labeller = labeller(Source = facet_labels)) +  # Custom facet titles
+    facet_wrap(~Source, ncol = 2, labeller = labeller(Source = facet_labels)) +  # Custom facet titles
     theme(legend.position = "bottom")
   
-  ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
-  
-  map = ggmap::get_map(location = c(-170.7325, -14.3258),
-                       maptype = "satellite",
-                       zoom = 10,
-                       # color = "bw",
-                       force = TRUE)
-  
-  ggmap(map) +
-    geom_spatial_point(data = df, aes(Longitude, Latitude, 
-                                      fill = Source,  
-                                      color = Source),  # Map size to y
-                       shape = 21, crs = 4326) +
+  p2 = ggmap(map) +
+    geom_spatial_point(data = df, 
+                       aes(Longitude, Latitude, 
+                           fill = Source,  
+                           color = Source),
+                       shape = 21, crs = 4326,
+                       size = 5) +
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    annotate("text", x = -170.8375, y = -14.23039, 
-             label = paste0(species, "\n1980-2024\nSource = GBIF & OBIS"), 
-             hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") + 
-    scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
-    scale_x_continuous(limits = c(-170.8375, -170.508), "") +
+    annotate("text", x = -170.8375, y = -14.23855, 
+             label = paste0(species, "\n1980-2024\nSource: GBIF & OBIS"), 
+             hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") + 
+    scale_y_continuous(limits = c(-14.36940, -14.23855), "") +
+    scale_x_continuous(limits = c(-170.8375, -170.5450), "") +
     theme_minimal() + 
     theme(legend.position = c(0.92, 0.22),
           legend.background = element_blank(),             # Transparent background
@@ -182,12 +182,16 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis.png"), height = 4, width = 8.5)
-  readr::write_csv(df, file = paste0("data/occurances_", species, "_gbif_obis.csv"))
+  p1
   
-  occ_df = rbind(df, occ_df)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_global.png"), height = 5)
+  
+  p2
+  
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_local.png"), height = 5)
+  
+  readr::write_csv(df, file = paste0("data/occurances_", species, "_gbif_obis.csv"))
   
 }
 
 close(pb)
-readr::write_csv(occ_df, file = "data/GBIF_OBIS_occurances_multi.csv")
