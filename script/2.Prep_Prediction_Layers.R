@@ -4,7 +4,8 @@ library(dplyr)
 rm(list = ls())
 select = dplyr::select
 
-df <- readRDS("data/eds_grid_for_prediction.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_shallow.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_deep.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)
@@ -31,7 +32,8 @@ names(df) <- gsub("_YR05", "_05yr", names(df)); names(df)
 names(df) <- gsub("_YR10", "_10yr", names(df)); names(df)
 names(df) <- gsub("_ALLB4", "_all_before", names(df)); names(df)
 
-df <- df %>% select(-contains("kd490")); names(df)
+# df <- df %>% select(-contains("kd490")); names(df)
+# df <- df %>% select(-contains("chlorophyll_a_npp_viirs")); names(df)
 df <- df %>% select(-contains("hi_otp")); names(df)
 df <- df %>% select(-contains("mhi")); names(df)
 df <- df %>% select(-contains("biweekly_range")); names(df)
@@ -52,25 +54,155 @@ df <- df %>% select(-contains("1_deg.")); names(df)
 df <- df %>% select(-contains("7daymax")); names(df)
 df <- df %>% select(-contains("jplmur")); names(df)
 
-df <- df %>% select(where(~ all(!is.na(.)))); names(df)
-df <- df %>% select(where(~ n_distinct(.) > 1)); names(df)
+names(df) <- gsub(".tif", "", names(df)); names(df)
+names(df) <- gsub(".nc", "", names(df)); names(df)
+
+names(df) <- gsub("diste.from.port.v20201104f", "distance.from.port", names(df)); names(df)
+names(df) <- gsub("gpw_v4_population_density_rev11_2pt5_min", "population_density", names(df)); names(df)
+names(df) <- gsub("sed_export", "sedimentation", names(df)); names(df)
 
 names(df) <- gsub("_daily", "", names(df)); names(df)
 names(df) <- gsub("_monthly", "", names(df)); names(df)
 
 names(df) <- gsub("_crw_", "_", names(df)); names(df)
-names(df) <- gsub("_viirs_", "_", names(df)); names(df)
+# names(df) <- gsub("_viirs_", "_", names(df)); names(df)
 names(df) <- gsub("_noaa_", "_", names(df)); names(df)
 names(df) <- gsub("_yr01", "", names(df)); names(df)
 
+df <- df %>% filter(!is.na(sedimentation))
+df <- df %>% filter(!is.na(bathymetry))
+df <- df %>% filter(!is.na(population_density))
+
+# merge data sources for chla, kd490, par, and kd
+
+# Define the statistical summaries
+summaries <- c("mean", "sd", "q05", "q95", "mean_annual_range")
+
+# Define variables and their corresponding data sources
+variable_sources <- list(
+  "chlorophyll_a" = c("esa_oc_cci_v6.0", "npp_viirs"),
+  "kd490" = c("esa_oc_cci", "viirs"),
+  "par" = c("aqua_modis", "nasa_viirs")
+  # "kdpar" = c("viirs")
+)
+
+# Function to merge multiple columns
+merge_columns <- function(...) {
+  cols <- list(...)
+  non_na_counts <- rowSums(!is.na(do.call(cbind, cols)))
+  merged_col <- rowMeans(do.call(cbind, cols), na.rm = TRUE)
+  merged_col[non_na_counts == 0] <- NA
+  return(merged_col)
+}
+
+# Loop over variables and summaries to create merged columns
+for (variable in names(variable_sources)) {
+  
+  sources <- variable_sources[[variable]]
+  
+  for (stat in summaries) {
+    
+    # Initialize a list to hold columns from different sources
+    cols_list <- list()
+    
+    for (source in sources) {
+      
+      # Construct the column name
+      col_name <- paste0(stat, "_", variable, "_", source)
+      if (col_name %in% names(df)) {
+        # Add the column to the list
+        cols_list[[source]] <- df[[col_name]]
+      } else {
+        # If the column doesn't exist, fill with NA
+        cols_list[[source]] <- rep(NA, nrow(df))
+      }
+    }
+    
+    # Merge the columns using the merging function
+    merged_col <- merge_columns(cols_list[[1]], cols_list[[2]])
+    
+    # Name of the merged column
+    merged_col_name <- paste0(stat, "_", variable)
+    
+    # Add the merged column to the data frame
+    df[[merged_col_name]] <- merged_col
+    
+  }
+}
+
+# Optional: Remove the original columns
+original_cols <- c()
+for (variable in names(variable_sources)) {
+  sources <- variable_sources[[variable]]
+  for (stat in summaries) {
+    for (source in sources) {
+      col_name <- paste0(stat, "_", variable, "_", source)
+      original_cols <- c(original_cols, col_name)
+    }
+  }
+}
+
+df <- df %>% select(-all_of(original_cols))
+
+# List of columns with more than 10% NAs
+columns_with_na <- df %>%
+  summarise(across(everything(), ~ mean(is.na(.)))) %>%
+  select(where(~ . > 0.01)) %>%
+  names()
+
+# Loop through each column and plot
+cols_with_na_in_summary <- c()
+
+# Loop through each column and plot
+for (col in columns_with_na) {
+  
+  df_summary <- df %>%
+    group_by(lon, lat) %>%
+    summarise(y = mean(.data[[col]], na.rm = TRUE))
+  
+  if (sum(is.na(df_summary$y)) > 0) {
+    print(col)
+    # Append the column name to the vector
+    cols_with_na_in_summary <- c(cols_with_na_in_summary, col)
+  }
+  
+  p <- ggplot(df_summary, aes(lon, lat, fill = y)) +
+    geom_raster(show.legend = FALSE) +
+    scale_fill_viridis_c() + 
+    labs(title = col, fill = col)
+  
+  print(p)
+}
+
+df <- df %>% select(-all_of(cols_with_na_in_summary))
+
+# df <- df %>% select(where(~ mean(is.na(.)) <= 0.1)); names(df)
+# df <- df %>% select(where(~ all(!is.na(.)))); names(df)
+df <- df %>% select(where(~ n_distinct(.) > 1)); names(df)
+
+# Define the columns to keep in a specific order
+key_columns <- c("lon", "lat", "year", "month", "day", "bathymetry", 
+                 "distance.from.port", "population_density", "sedimentation")
+
+# Get the rest of the columns, sorted alphabetically
+other_columns <- setdiff(names(df), key_columns) %>% sort()
+
+# Reorder the columns by combining the key columns with the alphabetically sorted ones
+df <- df %>% select(all_of(key_columns), all_of(other_columns))
+
+# View the reordered column names
+names(df)
+
 visdat::vis_miss(df, warn_large_data = F)
+
+# rastertize for maxent 
 
 eds <- rast()
 
-for (v in 6:36) {
+for (v in 6:50) {
   
   var_name <- colnames(df)[v]
-
+  
   p <- df %>%
     dplyr::select(lon, lat, !!sym(var_name)) %>% 
     group_by(lon, lat) %>% 
@@ -83,21 +215,11 @@ for (v in 6:36) {
     rast(type = "xyz")
   
   eds <- c(eds, p)
-
+  
 }
 
-anth <- rast("data/sed_export.tif")
-anth <- terra::resample(anth, rast(eds))
-names(anth) = "sed_export"
-
-crs(eds) <- crs(anth)
-
-eds = c(eds, anth)
-
-eds = raster::stack(eds)
-
-plot(eds[[1:12]])
-plot(eds[[13:24]])
-plot(eds[[25:31]])
+plot(eds)
+eds = stack(eds)
+eds = readAll(eds)
 
 save(eds, file = "data/eds.rdata")

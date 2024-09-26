@@ -6,7 +6,7 @@ run_maxent = function(occ_sf, env) {
   
   occ_sf = occ_df
   env = eds
-
+  
   # Get unique Scientific Names
   print(unique(occ_sf$Scientific.Name))
   species = unique(occ_sf$Scientific.Name)
@@ -22,6 +22,8 @@ run_maxent = function(occ_sf, env) {
     occ_sp = occ_sf[occ_sf$Scientific.Name == sp, c("Longitude", "Latitude")]
     
     crs(env) = "+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +datum=WGS84"
+    
+    # plot(env[["bathymetry"]]); points(occ_sp, col='red', pch = 20) # Plot the first environmental layer
     
     # Run ENMevaluate
     enmeval_results = ENMevaluate(occ_sp, env, 
