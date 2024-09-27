@@ -32,7 +32,7 @@ pb <- txtProgressBar(min = 0, max = length(species_list), style = 3)
 
 for (s in 1:length(species_list)) {
   
-  # s = 1
+  # s = 2
   
   max_uncertainty <- 5000  # Adjust this value based on your needs
   
@@ -159,7 +159,8 @@ for (s in 1:length(species_list)) {
     geom_sf(data = dfi, fill = "red", size = 3, shape = 21, alpha = 0.5) + 
     coord_sf(crs = "+proj=robin") +
     theme_minimal() +
-    facet_wrap(~Source, ncol = 2, labeller = labeller(Source = facet_labels)) +
+    ggtitle(species) + 
+    facet_wrap(~Source, ncol = 1, labeller = labeller(Source = facet_labels)) +
     theme(legend.position = "bottom")
   
   ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_global.png"), width = 10)

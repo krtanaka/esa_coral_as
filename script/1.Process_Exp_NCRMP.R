@@ -41,10 +41,10 @@ for (s in 1:length(species_list)) {
   df = dfi %>%
     filter(y == "present") %>% 
     mutate(Scientific.Name = species, 
-           Source = "CoralBelt") %>% 
+           Source = "Exp.NCRMP") %>% 
     dplyr::select(Longitude, Latitude, Scientific.Name, Source)
   
-  readr::write_csv(df, file = paste0("data/occurances_", species, "_coralbelt.csv"))
+  readr::write_csv(df, file = paste0("data/occurances_", species, "_ncrmp_exp.csv"))
   
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
   
@@ -73,7 +73,7 @@ for (s in 1:length(species_list)) {
     scale_y_continuous(limits = range(dfi$Latitude), "") +
     scale_x_continuous(limits = range(dfi$Longitude), "") +
     annotate("text", x = min(dfi$Longitude), y = max(dfi$Latitude), 
-             label = paste0(species, "\n2015-2023\nSource: CoralBelt\nn = ", sum_p), 
+             label = paste0(species, "\n2015-2023\nSource: Exp.NCRMP\nn = ", sum_p), 
              hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") + 
     theme_minimal() + 
     theme(legend.position = c(0.92, 0.22),
@@ -82,6 +82,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_coralbelt.png"), width = 8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_ncrmp_exp.png"), width = 8)
   
 }
