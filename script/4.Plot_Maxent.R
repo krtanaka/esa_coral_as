@@ -14,7 +14,7 @@ source("script/functions.R")
 species_list <- c(
   "Acropora globiceps",
   "Isopora crateriformis"
-)[1]
+)[2]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 

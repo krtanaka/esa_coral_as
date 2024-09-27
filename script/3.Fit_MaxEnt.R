@@ -42,9 +42,14 @@ nps <-  read_csv(paste0("data/occurances_", species, "_nps.csv")) %>%
 ncrmp_exp <-  read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv")) %>%
   select(Longitude, Latitude, Scientific.Name, Source)
 
+crag <-  read_csv(paste0("data/occurances_", species, "_crag.csv")) %>%
+  select(Longitude, Latitude, Scientific.Name, Source)
+
 # Combine datasets
 occ_df <- bind_rows(ncrmp, gbif, nps, ncrmp_exp)
+occ_df <- bind_rows(gbif, nps, ncrmp_exp, crag)
 occ_df <- bind_rows(gbif, nps, ncrmp_exp)
+
 occ_df <- bind_rows(nps, ncrmp_exp)
 # occ_df <- bind_rows(ncrmp, cb)
 
