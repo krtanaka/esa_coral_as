@@ -27,7 +27,7 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 source("script/functions.R")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[3]
 
 # Use paste() to construct file paths dynamically based on the selected species
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp.csv")) %>%
@@ -51,7 +51,7 @@ occ_df <- bind_rows(gbif, nps, ncrmp_exp, crag)
 occ_df <- bind_rows(gbif, nps, ncrmp_exp)
 
 occ_df <- bind_rows(nps, ncrmp_exp)
-# occ_df <- bind_rows(ncrmp, cb)
+occ_df <- bind_rows(ncrmp)
 
 map = ggmap::get_map(location = c(-170.7231, -14.30677),
                      maptype = "satellite",
