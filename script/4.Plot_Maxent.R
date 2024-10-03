@@ -11,7 +11,7 @@ library(tidyverse)
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[3]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 
@@ -43,6 +43,7 @@ auc = maxent_result$model@results %>%
 load("data/eds.rdata")
 
 r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
+r <- readAll(r); save(r, file = paste0(paste0("output/maxent_raster_", species_list, ".rdata")))
 r <- rasterToPoints(r) %>% as.data.frame()
 
 # use ggmap
