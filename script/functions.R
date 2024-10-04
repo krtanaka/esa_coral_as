@@ -14,7 +14,7 @@ run_maxent = function(occ_sf, env) {
   # Loop through each species
   for(sp in species) {
     
-    # sp = species[1]
+    # sp = unique(occ_sf$Scientific.Name)
     
     cat(paste("Processing", sp, "\n"))
     
@@ -25,18 +25,30 @@ run_maxent = function(occ_sf, env) {
     
     # plot(env[["bathymetry"]]); points(occ_sp, col='red', pch = 20) # Plot the first environmental layer
     
-    # Run ENMevaluate
-    enmeval_results = ENMevaluate(occ_sp, env, 
-                                  bg = NULL, 
-                                  tune.args = list(fc = c("L","LQ","H", "LQH", "LQHP", "LQHPT"), rm = 1:5), 
-                                  partitions = "randomkfold", 
-                                  # partition.settings = list(kfolds = 2),
-                                  algorithm = "maxnet", 
-                                  # n.bg = 100,
-                                  # parallel = T,
-                                  # numCores = detectCores()/2,
+    # # Run ENMevaluate
+    enmeval_results = ENMevaluate(occ_sp, env,
+                                  bg = NULL,
+                                  tune.args = list(fc = c("L", "LQ", "H", "LQH", "LQHP", "LQHPT"), rm = 1:5),
+                                  partitions = "randomkfold",
+                                  partition.settings = list(kfolds = 5),
+                                  algorithm = "maxnet",
+                                  # n.bg = 1000,
+                                  parallel = T,
+                                  numCores = detectCores() / 2,
                                   updateProgress = T,
-                                  taxon.name = sp) # specify the taxon name here
+                                  taxon.name = sp)
+    
+    # # Using Block Partitioning
+    # enmeval_results = ENMevaluate(occ_sp, env,
+    #                               bg = NULL,
+    #                               tune.args = list(fc = c("L", "LQ", "H", "LQH", "LQHP", "LQHPT"), rm = 1:5),
+    #                               partitions = "block",
+    #                               algorithm = "maxnet",
+    #                               # n.bg = 100,
+    #                               parallel = T,
+    #                               numCores = detectCores() / 2,
+    #                               updateProgress = TRUE,
+    #                               taxon.name = sp)
     
     enmeval_df = enmeval_results@results
     

@@ -27,10 +27,10 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 source("script/functions.R")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[3]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 
 # Use paste() to construct file paths dynamically based on the selected species
-ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp.csv")) %>%
+ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv")) %>%
   select(Longitude, Latitude, Scientific.Name, Source)
 
 gbif <-  read_csv(paste0("data/occurances_", species, "_gbif_obis.csv")) %>%
@@ -39,17 +39,14 @@ gbif <-  read_csv(paste0("data/occurances_", species, "_gbif_obis.csv")) %>%
 nps <-  read_csv(paste0("data/occurances_", species, "_nps.csv")) %>%
   select(Longitude, Latitude, Scientific.Name, Source)
 
-ncrmp_exp <-  read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv")) %>%
-  select(Longitude, Latitude, Scientific.Name, Source)
-
 crag <-  read_csv(paste0("data/occurances_", species, "_crag.csv")) %>%
   select(Longitude, Latitude, Scientific.Name, Source)
 
 # Combine datasets
-occ_df <- bind_rows(ncrmp, gbif, nps, ncrmp_exp)
-occ_df <- bind_rows(gbif, nps, ncrmp_exp, crag)
+occ_df <- bind_rows(ncrmp, gbif, nps, crag)
+occ_df <- bind_rows(gbif, nps, crag)
+occ_df <- bind_rows(gbif, nps)
 occ_df <- bind_rows(gbif, nps, ncrmp_exp)
-
 occ_df <- bind_rows(nps, ncrmp_exp)
 occ_df <- bind_rows(ncrmp)
 
