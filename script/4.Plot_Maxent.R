@@ -11,7 +11,7 @@ library(tidyverse)
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 
@@ -25,8 +25,8 @@ maxent_result$model@results %>%
   arrange(V1) %>%
   mutate(rowname = factor(rowname, levels = rowname)) %>% 
   ggplot(aes(V1, rowname, fill = V1)) + 
-  # labs(x = "%", y = "", title = paste0("Variable Contribution for\n ", species_list)) +
-  labs(x = "%", y = "", title = "Variable Contribution") +
+  labs(x = "%", y = "", title = paste0("Variable Contribution for ", species_list)) +
+  # labs(x = "%", y = "", title = "Variable Contribution") +
   geom_point(shape = 21, size = 5, show.legend = F) + 
   scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt")
 
@@ -68,7 +68,7 @@ map = ggmap::get_map(location = c(mean_lon, mean_lat),
 
 ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
-                     size = 7,
+                     size = 2.5,
                      shape = 22, alpha = 0.7, crs = 4326) + 
   annotate("text", x = min(r$x), y = max(r$y),
            label = paste0(species_list, "\nPred. Occ. Prob.\nAUC = ",auc),

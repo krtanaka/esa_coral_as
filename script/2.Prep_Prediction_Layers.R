@@ -4,8 +4,9 @@ library(dplyr)
 rm(list = ls())
 select = dplyr::select
 
-df <- readRDS("data/eds_grid_shallow.rds") %>% filter(unit == "Tutuila")
-df <- readRDS("data/eds_grid_deep.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_shallow.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_deep.rds") %>% filter(unit == "Tutuila") # 1km res
+df <- readRDS("data/eds_grid_output.rds") %>% filter(unit == "Tutuila") # 500m res
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)

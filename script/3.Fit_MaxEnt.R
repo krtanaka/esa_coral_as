@@ -27,28 +27,32 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 source("script/functions.R")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 
-# Use paste() to construct file paths dynamically based on the selected species
-ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv")) %>%
-  select(Longitude, Latitude, Scientific.Name, Source)
+ncrmp = read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
 
-gbif <-  read_csv(paste0("data/occurances_", species, "_gbif_obis.csv")) %>%
-  select(Longitude, Latitude, Scientific.Name, Source)
+# List of possible dataset file paths
+file_paths <- list(
+  ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
+  gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
+  nps = paste0("data/occurances_", species, "_nps.csv"),
+  crag = paste0("data/occurances_", species, "_crag.csv")
+)
 
-nps <-  read_csv(paste0("data/occurances_", species, "_nps.csv")) %>%
-  select(Longitude, Latitude, Scientific.Name, Source)
+# Initialize an empty list to store the data frames
+data_list <- list()
 
-crag <-  read_csv(paste0("data/occurances_", species, "_crag.csv")) %>%
-  select(Longitude, Latitude, Scientific.Name, Source)
+# Loop through the file paths, read them only if the file exists
+for (dataset in names(file_paths)) {
+  if (file.exists(file_paths[[dataset]])) {
+    data <- read_csv(file_paths[[dataset]]) %>%
+      select(Longitude, Latitude, Scientific.Name, Source)
+    data_list[[dataset]] <- data
+  }
+}
 
-# Combine datasets
-occ_df <- bind_rows(ncrmp, gbif, nps, crag)
-occ_df <- bind_rows(gbif, nps, crag)
-occ_df <- bind_rows(gbif, nps)
-occ_df <- bind_rows(gbif, nps, ncrmp_exp)
-occ_df <- bind_rows(nps, ncrmp_exp)
-occ_df <- bind_rows(ncrmp)
+# Combine all available datasets into a single data frame
+occ_df <- bind_rows(data_list)
 
 map = ggmap::get_map(location = c(-170.7231, -14.30677),
                      maptype = "satellite",
