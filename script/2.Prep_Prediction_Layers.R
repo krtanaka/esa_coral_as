@@ -4,9 +4,9 @@ library(dplyr)
 rm(list = ls())
 select = dplyr::select
 
-# df <- readRDS("data/eds_grid_shallow.rds") %>% filter(unit == "Tutuila")
-df <- readRDS("data/eds_grid_deep.rds") %>% filter(unit == "Tutuila") # 1km res
-df <- readRDS("data/eds_grid_output.rds") %>% filter(unit == "Tutuila") # 500m res
+df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)
@@ -200,7 +200,7 @@ visdat::vis_miss(df, warn_large_data = F)
 
 eds <- rast()
 
-for (v in 6:50) {
+for (v in 6:51) {
   
   var_name <- colnames(df)[v]
   
