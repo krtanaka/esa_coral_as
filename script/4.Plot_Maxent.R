@@ -35,14 +35,14 @@ var_list %>%
   scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") + 
   scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "log10")
 
-var_list %>% 
-  filter(V1 > 0) %>% 
-  ggplot(aes(V1, rowname, fill = V1, color = V1)) + 
-  labs(x = "Variable Contribution %", y = "", title = species_list) +
-  geom_point(shape = 21, size = 5, show.legend = F) + 
-  ggdark::dark_theme_classic(base_size = 12) +
-  scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") + 
-  scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt")
+# var_list %>% 
+#   filter(V1 > 0) %>% 
+#   ggplot(aes(V1, rowname, fill = V1, color = V1)) + 
+#   labs(x = "Variable Contribution %", y = "", title = species_list) +
+#   geom_point(shape = 21, size = 5, show.legend = F) + 
+#   ggdark::dark_theme_classic(base_size = 12) +
+#   scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") + 
+#   scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt")
 
 ggsave(last_plot(),
        filename =  file.path(paste0("output/maxent_var_", species_list, ".png")), 
