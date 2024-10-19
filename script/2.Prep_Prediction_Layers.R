@@ -70,6 +70,7 @@ names(df) <- gsub("_crw_", "_", names(df)); names(df)
 names(df) <- gsub("_noaa_", "_", names(df)); names(df)
 names(df) <- gsub("_yr01", "", names(df)); names(df)
 
+df <- df %>% mutate(bathymetry = ifelse(bathymetry < -30, NA, bathymetry))
 df <- df %>% filter(!is.na(sedimentation))
 df <- df %>% filter(!is.na(bathymetry))
 df <- df %>% filter(!is.na(population_density))

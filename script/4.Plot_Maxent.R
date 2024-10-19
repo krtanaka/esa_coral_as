@@ -152,14 +152,14 @@ max_lon <- max(coords[, 1])
 
 map = ggmap::get_map(location = c(mean_lon, mean_lat),
                      maptype = "satellite",
-                     zoom = 10,
+                     zoom = 11,
                      color = "bw",
                      force = T)
 
 ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
                      size = 3.5,
-                     shape = 22, alpha = 0.5, crs = 4326) + 
+                     shape = 22, alpha = 0.8, crs = 4326) + 
   annotate("text", x = min(r$x), y = max(r$y),
            label = paste0(species_list, "\nPred. Occ. Prob.\nAUC = ",auc),
            hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
