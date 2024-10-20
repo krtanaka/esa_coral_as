@@ -46,7 +46,7 @@ var_list %>%
 
 ggsave(last_plot(),
        filename =  file.path(paste0("output/maxent_var_", species_list, ".png")), 
-       height = 6, width = 5.5)
+       height = 6, width = 8)
 
 env_vars <- names(maxent_result$model@presence)
 

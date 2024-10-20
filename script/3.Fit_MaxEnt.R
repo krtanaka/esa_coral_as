@@ -34,9 +34,9 @@ ncrmp = read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
 # List of possible dataset file paths
 # for 
 file_paths <- list(
-  ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv")
+  ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
   # gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
-  # nps = paste0("data/occurances_", species, "_nps.csv"),
+  nps = paste0("data/occurances_", species, "_nps.csv")
   # crag = paste0("data/occurances_", species, "_crag.csv")
 )
 
