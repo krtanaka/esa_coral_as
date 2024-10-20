@@ -11,7 +11,7 @@ library(tidyverse)
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 

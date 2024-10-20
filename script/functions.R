@@ -22,7 +22,8 @@ run_maxent = function(occ_sf, env) {
     occ_sp = occ_sf[occ_sf$Scientific.Name == sp, c("Longitude", "Latitude")]
     
     crs(env) = "+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +datum=WGS84"
-    
+    crs(env) <- CRS("+proj=longlat +datum=WGS84 +no_defs")
+
     # plot(env[["bathymetry"]]); points(occ_sp, col='red', pch = 20) # Plot the first environmental layer
     
     # # Run ENMevaluate
