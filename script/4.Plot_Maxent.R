@@ -11,7 +11,7 @@ library(tidyverse)
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 
@@ -158,7 +158,7 @@ map = ggmap::get_map(location = c(mean_lon, mean_lat),
 
 ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
-                     size = 3.5,
+                     size = 0.5,
                      shape = 22, alpha = 0.8, crs = 4326) + 
   annotate("text", x = min(r$x), y = max(r$y),
            label = paste0(species_list, "\nPred. Occ. Prob.\nAUC = ",auc),

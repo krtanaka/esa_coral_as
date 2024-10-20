@@ -76,7 +76,7 @@ ggmap(map) +
         legend.text = element_text(color = "white", face = "bold"),  # White and bold text
         legend.title = element_text(color = "white", face = "bold"))
 
-ggsave(last_plot(), filename =  file.path(paste0("output/combined_occurances_", species, ".png")), width = 9)
+# ggsave(last_plot(), filename =  file.path(paste0("output/combined_occurances_", species, ".png")), width = 9)
 
 # Check how many occurrences subset for each spp.
 table(occ_df$Scientific.Name)
