@@ -5,7 +5,7 @@ library(ggplot2)
 
 rm(list = ls())
 
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 load(paste0("output/maxent_raster_", species, ".rdata"))
 predicted_suitability <- r
 
@@ -68,26 +68,21 @@ ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
     title = paste("ROC Curve (AUC =", round(auc_manual, 2), ")"),
     x = "False Positive Rate",
     y = "True Positive Rate"
-  )
+  ) + coord_fixed()
 
 ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
-  geom_line(color = "white", size = 1) +  # ROC curve line
-  geom_abline(linetype = "dashed", color = "white") +  # Diagonal line for random performance
+  geom_line(size = 1) +  # ROC curve line
+  geom_abline(linetype = "dashed") +  # Diagonal line for random performance
   labs(
-    title = paste("ROC Curve (AUC =", round(auc_manual, 2), ")"),
+    title = paste(species, "\nROC Curve (AUC =", round(auc_manual, 2), ")"),
     x = "False Positive Rate",
     y = "True Positive Rate"
   ) +
-  ggdark::dark_theme_minimal(base_size = 20) + 
-  coord_fixed() +
-  theme(
-    plot.background = element_rect(fill = "transparent", color = NA),  # Transparent plot background
-    panel.background = element_rect(fill = "transparent", color = NA), # Transparent panel background
-    panel.grid = element_line(color = "grey30")  # Grid lines in grey (optional)
-  )
+  ggdark::dark_theme_minimal(base_size = 15) + 
+  coord_fixed()
 
 # Save the plot with a transparent background
-ggsave(last_plot(), file = "/Users/kisei.tanaka/Desktop/roc.png", height = 5, bg = "transparent")
+ggsave(last_plot(), file = paste0("output/roc_", species, ".png"), height = 5, bg = "transparent")
 
 # Define a threshold (e.g., 0.5) to classify presence/absence
 threshold <- 0.5
@@ -113,24 +108,15 @@ confusion_matrix_df = confusion_matrix$table %>% as.data.frame()
 
 # Plot the confusion matrix using ggplot
 ggplot(confusion_matrix_df, aes(x = as.factor(Prediction), y = as.factor(Reference), fill = Freq)) +
-  geom_tile(color = "white") +  # Create the heatmap tiles
-  geom_text(aes(label = Freq), color = "white", size = 6) +  # Add the counts as text on the tiles
-  scale_fill_gradient(low = "lightblue", high = "darkblue") +  # Color gradient for the counts
+  geom_tile(color = "white", show.legend = F) +  # Create the heatmap tiles
+  geom_text(aes(label = Freq), size = 10) +  # Add the counts as text on the tiles
+  scale_fill_gradientn(colors = matlab.like(100)) +  # Color gradient for the counts
   labs(
-    title = "Confusion Matrix",
+    title = species,
     x = "Prediction",
     y = "Reference"
   ) +
-  theme_minimal(base_size = 30) +  # Clean theme
-  theme(
-    plot.background = element_rect(fill = "transparent", color = NA),  # Transparent plot background
-    panel.background = element_rect(fill = "transparent", color = NA), # Transparent panel background
-    panel.grid = element_blank(),  # Remove grid lines for a cleaner look
-    axis.text = element_text(color = "white"),  # Make axis text white
-    axis.title = element_text(color = "white"), # Make axis title white
-    plot.title = element_text(color = "white"), # Make plot title white
-    legend.text = element_text(color = "white"), # Make legend text white (if applicable)
-    legend.title = element_text(color = "white") # Make legend title white (if applicable)
-  )
-# Save the plot with a transparent background
-ggsave(last_plot(), file = "/Users/kisei.tanaka/Desktop/roc.png", height = 5, bg = "transparent")
+  coord_fixed() + 
+  ggdark::dark_theme_minimal(base_size = 15)
+
+ggsave(last_plot(), file = paste0("output/confusion_", species, ".png"), height = 5, bg = "transparent")
