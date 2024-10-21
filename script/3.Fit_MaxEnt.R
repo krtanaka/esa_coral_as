@@ -27,15 +27,14 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 source("script/functions.R")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 
 ncrmp = read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
 
 # List of possible dataset file paths
-# for 
 file_paths <- list(
   ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
-  # gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
+  gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
   nps = paste0("data/occurances_", species, "_nps.csv"),
   crag = paste0("data/occurances_", species, "_crag.csv")
 )
@@ -53,7 +52,10 @@ for (dataset in names(file_paths)) {
 }
 
 # Combine all available datasets into a single data frame
-occ_df <- bind_rows(data_list)
+occ_df <- bind_rows(data_list) %>%
+  filter(Latitude >= -14.38, Latitude <= -14.22,
+         Longitude >= -170.85, Longitude <= -170.53)
+  
 
 map = ggmap::get_map(location = c(-170.7231, -14.30677),
                      maptype = "satellite",
@@ -65,19 +67,21 @@ ggmap(map) +
   geom_spatial_point(data = occ_df, aes(Longitude, Latitude, fill = Source, color = Source),
                      size = 3,
                      shape = 21, alpha = 0.8, crs = 4326) +
-  annotate("text", x = -170.8375, y = -14.23714,
+  annotate("text", x = -170.85, y = -14.22,
            label = species,
-           hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") +
-  scale_y_continuous(limits = c(-14.36541, -14.23714), "") +
-  scale_x_continuous(limits = c(-170.8375, -170.5498), "") +
-  theme_minimal() +
-  theme(legend.position = c(0.92, 0.22),
-        legend.background = element_blank(),             # Transparent background
-        legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
-        legend.text = element_text(color = "white", face = "bold"),  # White and bold text
-        legend.title = element_text(color = "white", face = "bold"))
+           hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
+  scale_fill_discrete("") + 
+  scale_color_discrete("") + 
+  scale_y_continuous(limits = c(-14.38, -14.22), "") +
+  scale_x_continuous(limits = c(-170.85, -170.53), "") +
+  ggdark::dark_mode() + 
+  theme(legend.position = c(0.85, 0.22),
+        legend.background = element_blank(), 
+        legend.key = element_rect(colour = NA, fill = NA), 
+        legend.text = element_text(color = "white", size = 12, face = "bold"), 
+        legend.title = element_text(color = "white", size = 12, face = "bold"))
 
-# ggsave(last_plot(), filename =  file.path(paste0("output/combined_occurances_", species, ".png")), width = 9)
+ggsave(last_plot(), filename =  file.path(paste0("output/combined_occurances_", species, ".png")), width = 9)
 
 # Check how many occurrences subset for each spp.
 table(occ_df$Scientific.Name)
@@ -90,7 +94,8 @@ occ_df = occ_df %>%
 
 load("data/eds.rdata")
 
-v = usdm::vifstep(terra::rast(eds), th = 5)
+v = usdm::vifstep(terra::rast(eds), th = 3)
+
 eds = raster::subset(eds, v@results$Variables); names(eds)
 # eds <- dropLayer(eds, "sed_export"); names(eds)
 

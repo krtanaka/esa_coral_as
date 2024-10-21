@@ -12,7 +12,7 @@ library(dismo)
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 
 load(paste0("output/maxent_result_", species_list, ".rda"))
 
@@ -154,25 +154,31 @@ max_lon <- max(coords[, 1])
 map = ggmap::get_map(location = c(mean_lon, mean_lat),
                      maptype = "satellite",
                      zoom = 11,
-                     color = "bw",
+                     # color = "bw",
                      force = T)
 
 ggmap(map, darken = c(0.5, "black")) +
   geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
                      size = 0.5,
-                     shape = 22, alpha = 0.8, crs = 4326) + 
-  annotate("text", x = min(r$x), y = max(r$y),
-           label = paste0(species_list, "\nPred. Occ. Prob.\nAUC = ",auc),
-           hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
-  scale_fill_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
-  scale_color_gradientn(colors = matlab.like(100), "", limits = c(0,1)) + 
-  scale_y_continuous(limits = range(r$y), "") +
-  scale_x_continuous(limits = range(r$x), "") +
+                     shape = 22, alpha = 1, crs = 4326) + 
+  annotate("text", x = -170.85, y = -14.22,
+           label = paste0(species_list, "\nAUC = ",auc),
+           hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
+  scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1), 
+                       breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal", 
+                                                                     title.position = "top", 
+                                                                     barwidth = 12, barheight = 1.5)) +
+  scale_color_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1), 
+                        breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal", 
+                                                                      title.position = "top", 
+                                                                      barwidth = 12, barheight = 1.5)) +
+  scale_y_continuous(limits = c(-14.38, -14.22), "") +
+  scale_x_continuous(limits = c(-170.85, -170.53), "") +
   ggdark::dark_mode() + 
-  theme(legend.position = c(0.95, 0.25),
+  theme(legend.position = c(0.82, 0.12),
         legend.background = element_blank(), 
         legend.box.background = element_blank(), 
-        legend.text = element_text(color = "white"), 
-        legend.title = element_text(color = "white"))
+        legend.text = element_text(color = "white", size = 10, face = "bold"), 
+        legend.title = element_text(color = "white", face = "bold"))
 
 ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species_list, ".png")), width = 10)
