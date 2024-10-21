@@ -6,6 +6,7 @@ library(colorRamps)
 library(ggmap)
 library(ggspatial)
 library(tidyverse)
+library(dismo)
 
 # run "2.Prep_Prediction_Layers.R" first
 
