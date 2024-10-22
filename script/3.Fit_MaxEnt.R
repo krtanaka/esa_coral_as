@@ -29,7 +29,8 @@ source("script/functions.R")
 
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
-survey = c("ncrmp", "combined")[1]
+survey = c("ncrmp", "combined")[2]
+partition = c("randomkfold", "block")[2]
 
 # Load NCRMP occurrences
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
@@ -116,5 +117,5 @@ names(eds)
 plot(eds, col = matlab.like(100))
 
 # Run Maxent model
-maxent_results <- run_maxent(occ_df, eds, survey, partition = "randomkfold")
+maxent_results <- run_maxent(occ_df, eds, survey, partition)
 beepr::beep(2)
