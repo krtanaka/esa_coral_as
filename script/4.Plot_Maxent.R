@@ -16,9 +16,9 @@ select = dplyr::select
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1:2]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")
 survey_list <- c("ncrmp", "combined")
-partition_list <- c("randomkfold", "block")[1]
+partition_list <- c("randomkfold", "block")
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 
