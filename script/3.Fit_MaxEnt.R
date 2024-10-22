@@ -18,7 +18,8 @@ library(doParallel)
 # Clear workspace
 rm(list = ls())
 
-select = dplyr::select
+# Load necessary dplyr function
+select <- dplyr::select
 
 # Register Google Maps API key
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
@@ -28,21 +29,30 @@ source("script/functions.R")
 
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+model = c("ncrmp", "combined")[1]
 
-ncrmp = read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
+# Load NCRMP occurrences
+ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
 
-# List of possible dataset file paths
-file_paths <- list(
-  ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
-  gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
-  nps = paste0("data/occurances_", species, "_nps.csv"),
-  crag = paste0("data/occurances_", species, "_crag.csv")
-)
+# Set file paths based on the model
+file_paths <- if (model == "ncrmp") {
+  
+  list(ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"))
+  
+} else {
+  
+  list(
+    ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
+    gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
+    nps = paste0("data/occurances_", species, "_nps.csv"),
+    crag = paste0("data/occurances_", species, "_crag.csv")
+  )
+}
 
 # Initialize an empty list to store the data frames
 data_list <- list()
 
-# Loop through the file paths, read them only if the file exists
+# Read the files if they exist
 for (dataset in names(file_paths)) {
   if (file.exists(file_paths[[dataset]])) {
     data <- read_csv(file_paths[[dataset]]) %>%
@@ -51,25 +61,22 @@ for (dataset in names(file_paths)) {
   }
 }
 
-# Combine all available datasets into a single data frame
+# Combine all available datasets
 occ_df <- bind_rows(data_list) %>%
   filter(Latitude >= -14.38, Latitude <= -14.22,
          Longitude >= -170.85, Longitude <= -170.53)
-  
 
-map = ggmap::get_map(location = c(-170.7231, -14.30677),
-                     maptype = "satellite",
-                     zoom = 11,
-                     # color = "bw",
-                     force = T)
+# Generate the map
+map <- ggmap::get_map(location = c(-170.7231, -14.30677),
+                      maptype = "satellite",
+                      zoom = 11,
+                      force = TRUE)
 
 ggmap(map) +
   geom_spatial_point(data = occ_df, aes(Longitude, Latitude, fill = Source, color = Source),
-                     size = 3,
-                     shape = 21, alpha = 0.8, crs = 4326) +
+                     size = 3, shape = 21, alpha = 0.8, crs = 4326) +
   annotate("text", x = -170.85, y = -14.22,
-           label = species,
-           hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
+           label = species, hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
   scale_fill_discrete("") + 
   scale_color_discrete("") + 
   scale_y_continuous(limits = c(-14.38, -14.22), "") +
@@ -81,25 +88,34 @@ ggmap(map) +
         legend.text = element_text(color = "white", size = 12, face = "bold"), 
         legend.title = element_text(color = "white", size = 12, face = "bold"))
 
-ggsave(last_plot(), filename =  file.path(paste0("output/combined_occurances_", species, ".png")), width = 9)
+# Save the plot
+ggsave(last_plot(), filename = file.path(paste0("output/combined_occurances_", species, ".png")), width = 9)
 
-# Check how many occurrences subset for each spp.
+# Check the number of occurrences for each species
 table(occ_df$Scientific.Name)
 
-occ_df = occ_df %>% 
+# Filter occurrences based on the NCRMP data
+occ_df <- occ_df %>%
   filter(Longitude >= min(ncrmp$Longitude), Longitude <= max(ncrmp$Longitude),
-         Latitude >= min(ncrmp$Latitude), Latitude <= max(ncrmp$Latitude)) %>% 
-  select(Longitude, Latitude, Scientific.Name) %>% 
+         Latitude >= min(ncrmp$Latitude), Latitude <= max(ncrmp$Latitude)) %>%
+  select(Longitude, Latitude, Scientific.Name) %>%
   distinct()
 
+# Load environmental dataset
 load("data/eds.rdata")
 
-v = usdm::vifstep(terra::rast(eds), th = 3)
+# Run VIF step for variable selection
+v <- usdm::vifstep(terra::rast(eds), th = 3)
 
-eds = raster::subset(eds, v@results$Variables); names(eds)
-# eds <- dropLayer(eds, "sed_export"); names(eds)
+# Subset environmental data based on VIF results
+eds <- raster::subset(eds, v@results$Variables)
+names(eds)
 
+# Plot the environmental data
 plot(eds, col = matlab.like(100))
 
-maxent_results = run_maxent(occ_df, eds)
+# Run Maxent model
+maxent_results <- run_maxent(occ_df, eds)
+
+# Sound alert when done
 beepr::beep(2)
