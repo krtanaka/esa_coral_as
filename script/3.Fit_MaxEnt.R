@@ -29,13 +29,13 @@ source("script/functions.R")
 
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
-model = c("ncrmp", "combined")[1]
+survey = c("ncrmp", "combined")[2]
 
 # Load NCRMP occurrences
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
 
 # Set file paths based on the model
-file_paths <- if (model == "ncrmp") {
+file_paths <- if (survey == "ncrmp") {
   
   list(ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"))
   
@@ -71,12 +71,13 @@ map <- ggmap::get_map(location = c(-170.7231, -14.30677),
                       maptype = "satellite",
                       zoom = 11,
                       force = TRUE)
+n = dim(occ_df)[1]
 
 ggmap(map) +
   geom_spatial_point(data = occ_df, aes(Longitude, Latitude, fill = Source, color = Source),
                      size = 3, shape = 21, alpha = 0.8, crs = 4326) +
   annotate("text", x = -170.85, y = -14.22,
-           label = species, hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
+           label = paste0(species, "\nn = ", n), hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
   scale_fill_discrete("") + 
   scale_color_discrete("") + 
   scale_y_continuous(limits = c(-14.38, -14.22), "") +
@@ -89,7 +90,7 @@ ggmap(map) +
         legend.title = element_text(color = "white", size = 12, face = "bold"))
 
 # Save the plot
-ggsave(last_plot(), filename = file.path(paste0("output/combined_occurances_", species, ".png")), width = 9)
+ggsave(last_plot(), filename = file.path(paste0("output/occurances_", species, "_", survey, ".png")), width = 9)
 
 # Check the number of occurrences for each species
 table(occ_df$Scientific.Name)
@@ -115,7 +116,5 @@ names(eds)
 plot(eds, col = matlab.like(100))
 
 # Run Maxent model
-maxent_results <- run_maxent(occ_df, eds)
-
-# Sound alert when done
+maxent_results <- run_maxent(occ_df, eds, survey, partition = "randomkfold")
 beepr::beep(2)
