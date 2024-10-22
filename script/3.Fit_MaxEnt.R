@@ -29,7 +29,7 @@ source("script/functions.R")
 
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
-survey = c("ncrmp", "combined")[2]
+survey = c("ncrmp", "combined")[1]
 
 # Load NCRMP occurrences
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
