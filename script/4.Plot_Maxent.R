@@ -20,6 +20,20 @@ species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna
 survey_list <- c("ncrmp", "combined")
 partition_list <- c("randomkfold", "block")
 
+ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
+
+map1 = ggmap::get_map(location = c(-170.705, -14.294),
+                      maptype = "satellite",
+                      zoom = 11,
+                      # color = "bw",
+                      force = T)
+
+map2 = ggmap::get_map(location = c(-170.68846, -14.25177),
+                      maptype = "satellite",
+                      zoom = 13,
+                      # color = "bw",
+                      force = T)
+
 for (species in species_list) {
   for (survey in survey_list) {
     for (partition in partition_list) {
@@ -164,35 +178,16 @@ for (species in species_list) {
         load("data/eds.rdata")
         
         r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
-        r <- readAll(r); save(r, file = paste0(paste0("output/maxent_raster_", species, "_", survey, "_", partition, ".rdata")))
+        r <- readAll(r)
+        save(r, file = paste0(paste0("output/maxent_raster_", species, "_", survey, "_", partition, ".rdata")))
         r <- rasterToPoints(r) %>% as.data.frame()
         
-        # use ggmap
-        ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
-        
-        # Get the coordinates of the cell centers
-        coords <- coordinates(eds %>% stack())
-        
-        # Calculate the mean latitude and longitude
-        mean_lat <- mean(coords[, 2], na.rm = TRUE)
-        mean_lon <- mean(coords[, 1], na.rm = TRUE)
-        min_lat <- min(coords[, 2])
-        max_lat <- max(coords[, 2])
-        min_lon <- min(coords[, 1])
-        max_lon <- max(coords[, 1])
-        
-        map = ggmap::get_map(location = c(mean_lon, mean_lat),
-                             maptype = "satellite",
-                             zoom = 11,
-                             # color = "bw",
-                             force = T)
-        
-        p1 = ggmap(map, darken = c(0.5, "black")) +
+        p1 = ggmap(map1, darken = c(0.5, "black")) +
           geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
                              size = 0.5,
                              shape = 22, alpha = 0.8, crs = 4326) + 
           annotate("text", x = -170.85, y = -14.22,
-                   label = paste0(species, "\nAUC = ",auc),
+                   label = paste0(species, "\nauc = ", auc, "\nsurvey = ", survey),
                    hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
           scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1), 
                                breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal", 
@@ -211,13 +206,7 @@ for (species in species_list) {
                 legend.text = element_text(color = "white", size = 10, face = "bold"), 
                 legend.title = element_text(color = "white", face = "bold"))
         
-        map = ggmap::get_map(location = c(-170.68846, -14.25177),
-                             maptype = "satellite",
-                             zoom = 13,
-                             # color = "bw",
-                             force = T)
-        
-        p2 = ggmap(map, darken = c(0.5, "black")) +
+        p2 = ggmap(map2, darken = c(0.5, "black")) +
           geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
                              shape = 22, alpha = 0.8, crs = 4326) + 
           scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
