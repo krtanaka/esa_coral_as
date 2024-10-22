@@ -18,7 +18,7 @@ source("script/functions.R")
 
 species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1:2]
 survey_list <- c("ncrmp", "combined")
-partition_list <- c("randomkfold", "block")
+partition_list <- c("randomkfold", "block")[1]
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 
@@ -224,7 +224,7 @@ for (species in species_list) {
         
         p1 + p2
         
-        ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", partition, ".png")), width = 15)
+        ggsave(last_plot(), filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", partition, ".png")), width = 16, bg = "transparent")
         
       } else {
         
