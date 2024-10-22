@@ -29,7 +29,7 @@ source("script/functions.R")
 
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
-survey = c("ncrmp", "combined")[2]
+survey = c("ncrmp", "combined")[1]
 partition = c("randomkfold", "block")[2]
 
 # Load NCRMP occurrences
