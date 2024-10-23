@@ -7,6 +7,7 @@ library(ggmap)
 library(ggspatial)
 library(tidyverse)
 library(dismo)
+library(patchwork)
 
 rm(list = ls())
 
@@ -39,7 +40,7 @@ for (species in species_list) {
     for (partition in partition_list) {
       
       # species = "Acropora globiceps"
-      # survey = "ncrmp"
+      # survey = "combined"
       # partition = "block"
       
       file_path <- paste0("output/maxent_result_", species, "_", survey, "_", partition, ".rda")
@@ -204,7 +205,9 @@ for (species in species_list) {
                 legend.background = element_blank(), 
                 legend.box.background = element_blank(), 
                 legend.text = element_text(color = "white", size = 10, face = "bold"), 
-                legend.title = element_text(color = "white", face = "bold"))
+                legend.title = element_text(color = "white", face = "bold"),
+                panel.background = element_rect(fill = "black", color = NA),
+                plot.background = element_rect(fill = "black", color = NA))
         
         p2 = ggmap(map2, darken = c(0.5, "black")) +
           geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
@@ -220,7 +223,9 @@ for (species in species_list) {
                 legend.background = element_blank(), 
                 legend.box.background = element_blank(), 
                 legend.text = element_text(color = "white", size = 10, face = "bold"), 
-                legend.title = element_text(color = "white", face = "bold"))
+                legend.title = element_text(color = "white", face = "bold"),
+                panel.background = element_rect(fill = "black", color = NA),
+                plot.background = element_rect(fill = "black", color = NA))
         
         p1 + p2
         
