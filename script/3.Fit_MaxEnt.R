@@ -29,7 +29,7 @@ source("script/functions.R")
 
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
-survey = c("ncrmp", "combined")[2]
+survey = c("ncrmp", "combined")[1]
 
 # Load NCRMP occurrences
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
@@ -89,8 +89,8 @@ ggmap(map) +
         legend.text = element_text(color = "white", size = 12, face = "bold"), 
         legend.title = element_text(color = "white", size = 12, face = "bold"))
 
-# Save the plot
-ggsave(last_plot(), filename = file.path(paste0("output/occurances_", species, "_", survey, ".png")), width = 9)
+# # Save the plot
+# ggsave(last_plot(), filename = file.path(paste0("output/occurances_", species, "_", survey, ".png")), width = 9)
 
 # Check the number of occurrences for each species
 table(occ_df$Scientific.Name)
@@ -112,8 +112,8 @@ v <- usdm::vifstep(terra::rast(eds), th = 3)
 eds <- raster::subset(eds, v@results$Variables)
 names(eds)
 
-# Plot the environmental data
-plot(eds, col = matlab.like(100))
+# # Plot the environmental data
+# plot(eds, col = matlab.like(100))
 
 # Run Maxent model
 maxent_results <- run_maxent(occ_df, eds, survey)
