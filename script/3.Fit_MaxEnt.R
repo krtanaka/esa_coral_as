@@ -28,7 +28,7 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 source("script/functions.R")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 survey = c("ncrmp", "combined")[1]
 
 # Load NCRMP occurrences
@@ -82,7 +82,7 @@ ggmap(map) +
   scale_color_discrete("") + 
   scale_y_continuous(limits = c(-14.38, -14.22), "") +
   scale_x_continuous(limits = c(-170.85, -170.53), "") +
-  ggdark::dark_mode() + 
+  # ggdark::dark_mode() + 
   theme(legend.position = c(0.85, 0.22),
         legend.background = element_blank(), 
         legend.key = element_rect(colour = NA, fill = NA), 
@@ -112,8 +112,8 @@ v <- usdm::vifstep(terra::rast(eds), th = 3)
 eds <- raster::subset(eds, v@results$Variables)
 names(eds)
 
-# # Plot the environmental data
-# plot(eds, col = matlab.like(100))
+# Plot the environmental data
+plot(eds, col = matlab.like(100))
 
 # Run Maxent model
 maxent_results <- run_maxent(occ_df, eds, survey)
