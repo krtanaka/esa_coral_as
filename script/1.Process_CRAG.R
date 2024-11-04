@@ -10,7 +10,7 @@ library(ggspatial)
 rm(list = ls())
 
 # Species list
-species_list <- c("Acropora globiceps", "Isopora crateriformis")[2]
+species_list <- c("Acropora globiceps", "Isopora crateriformis")
 
 for (s in 1:length(species_list)) {
   
@@ -37,7 +37,6 @@ for (s in 1:length(species_list)) {
   
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
   
-  # Get map for the given coordinates
   map = ggmap::get_map(location = c(mean(dfi$Longitude), mean(dfi$Latitude)),
                        maptype = "satellite",
                        zoom = 11,
@@ -46,22 +45,20 @@ for (s in 1:length(species_list)) {
   
   sum_p = dim(dfi)[1] %>% as.numeric()
   
-  # Create plot
   ggmap(map) +
-    geom_spatial_point(data = dfi, aes(Longitude, Latitude),  # Map size to y
-                       shape = 21, crs = 4326, show.legend = F, color = "red", fill = "red", alpha = 0.8, size = 4) +
-  
-    coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    scale_y_continuous(limits = range(dfi$Latitude), "") +
-    scale_x_continuous(limits = range(dfi$Longitude), "") +
-    annotate("text", x = min(dfi$Longitude), y = max(dfi$Latitude), 
+    geom_spatial_point(data = dfi, aes(Longitude, Latitude),
+                       shape = 21, crs = 4326, show.legend = F, color = "red", fill = "red", alpha = 0.5, size = 4) +
+    coord_sf(crs = 4326) +
+    scale_y_continuous(limits = c(-14.38, -14.22), "") +
+    scale_x_continuous(limits = c(-170.85, -170.53), "") +
+    annotate("text", x = -170.85, y = -14.22, 
              label = paste0(species, "\n2016-2020\nSource: CRAG\nn = ", sum_p), 
              hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") + 
-    theme_minimal() + 
+    theme_minimal() +
     theme(legend.position = c(0.92, 0.22),
-          legend.background = element_blank(), # Transparent background
-          legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
-          legend.text = element_text(color = "white", face = "bold"),  # White and bold text
+          legend.background = element_blank(), 
+          legend.key = element_rect(colour = NA, fill = NA), 
+          legend.text = element_text(color = "white", face = "bold"),
           legend.title = element_text(color = "white", face = "bold"))
   
   ggsave(last_plot(), file = paste0("data/occurances_", species, "_crag.png"), width = 8)
