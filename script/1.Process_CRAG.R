@@ -10,7 +10,7 @@ library(ggspatial)
 rm(list = ls())
 
 # Species list
-species_list <- c("Acropora globiceps", "Isopora crateriformis")
+species_list <- c("Acropora globiceps", "Isopora crateriformis")[2]
 
 for (s in 1:length(species_list)) {
   

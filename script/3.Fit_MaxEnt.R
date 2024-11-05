@@ -28,7 +28,7 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 source("script/functions.R")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 survey = c("ncrmp", "combined")[1]
 
 # Load NCRMP occurrences
@@ -66,31 +66,8 @@ occ_df <- bind_rows(data_list) %>%
   filter(Latitude >= -14.38, Latitude <= -14.22,
          Longitude >= -170.85, Longitude <= -170.53)
 
-# Generate the map
-map <- ggmap::get_map(location = c(-170.7231, -14.30677),
-                      maptype = "satellite",
-                      zoom = 11,
-                      force = TRUE)
-n = dim(occ_df)[1]
-
-ggmap(map) +
-  geom_spatial_point(data = occ_df, aes(Longitude, Latitude, fill = Source, color = Source),
-                     size = 3, shape = 21, alpha = 0.8, crs = 4326) +
-  annotate("text", x = -170.85, y = -14.22,
-           label = paste0(species, "\nn = ", n), hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
-  scale_fill_discrete("") + 
-  scale_color_discrete("") + 
-  scale_y_continuous(limits = c(-14.38, -14.22), "") +
-  scale_x_continuous(limits = c(-170.85, -170.53), "") +
-  # ggdark::dark_mode() + 
-  theme(legend.position = c(0.85, 0.22),
-        legend.background = element_blank(), 
-        legend.key = element_rect(colour = NA, fill = NA), 
-        legend.text = element_text(color = "white", size = 12, face = "bold"), 
-        legend.title = element_text(color = "white", size = 12, face = "bold"))
-
-# # Save the plot
-# ggsave(last_plot(), filename = file.path(paste0("output/occurances_", species, "_", survey, ".png")), width = 9)
+plot(occ_df$Longitude, occ_df$Latitude)
+maps::map(add = T)
 
 # Check the number of occurrences for each species
 table(occ_df$Scientific.Name)

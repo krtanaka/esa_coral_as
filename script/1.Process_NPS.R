@@ -45,30 +45,28 @@ for (s in 1:length(species_list)) {
   
   sum_p = table(dfi$y)[2] %>% as.numeric()
   
-  # Create plot
-  ggmap(map) +
-    geom_spatial_point(data = dfi, aes(Longitude, Latitude, 
-                                       fill = y,  
-                                       color = y,
-                                       alpha = y,
-                                       size = y),  # Map size to y
-                       shape = 21, crs = 4326, show.legend = F) +
-    scale_fill_manual(values = c("absent" = "yellow", "present" = "red")) +  # Set colors
-    scale_color_manual(values = c("absent" = "yellow", "present" = "red")) + 
-    scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.9)) +  # Dim absent, full opacity for present
-    scale_size_manual(values = c("absent" = 2, "present" = 4)) +  # Smaller for absent, larger for present
-    coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    scale_y_continuous(limits =  range(dfi$Latitude), "") +
-    scale_x_continuous(limits =  range(dfi$Longitude), "") +
-    annotate("text", x = -170.7243, y = -14.22946, label = paste0(species, "\n2007-2019\nSource = NPS\nn = ", sum_p), 
-             hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
-    theme_minimal() + 
-    theme(legend.position = c(0.92, 0.22),
-          legend.background = element_blank(),             # Transparent background
-          legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
-          legend.text = element_text(color = "white", face = "bold"),  # White and bold text
-          legend.title = element_text(color = "white", face = "bold"))
-  
+ggmap(map) +
+  geom_spatial_point(data = dfi, aes(Longitude, Latitude, 
+                                     fill = y,  
+                                     color = y,
+                                     alpha = y,
+                                     size = y),  # Map size to y
+                     shape = 21, crs = 4326, show.legend = FALSE) +
+  scale_fill_manual(values = c("absent" = "yellow", "present" = "red")) +  # Set colors
+  scale_color_manual(values = c("absent" = "yellow", "present" = "red")) + 
+  scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.9)) +  # Dim absent, full opacity for present
+  scale_size_manual(values = c("absent" = 2, "present" = 4)) +  # Smaller for absent, larger for present
+  coord_sf(crs = 4326) +    # Use coord_sf to address the warning
+  scale_y_continuous(limits =  range(dfi$Latitude), name = NULL) +
+  scale_x_continuous(limits =  range(dfi$Longitude), name = NULL) +
+  theme(
+    legend.position = c(0.92, 0.22),
+    legend.background = element_blank(),             # Transparent background
+    legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
+    legend.text = element_text(color = "white", face = "bold"),  # White and bold text
+    legend.title = element_text(color = "white", face = "bold")
+  )
+
   ggsave(last_plot(), file = paste0("data/occurances_", species, "_nps.png"), height = 6)
   
 }

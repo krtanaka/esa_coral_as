@@ -172,17 +172,17 @@ for (s in 1:length(species_list)) {
                            color = Source),
                        shape = 21, crs = 4326,
                        size = 5) +
-    coord_sf(crs = 4326) +    # Use coord_sf to address the warning
-    annotate("text", x = -170.8375, y = -14.23855, 
+    coord_sf(crs = 4326) +
+    scale_y_continuous(limits = c(-14.38, -14.22), "") +
+    scale_x_continuous(limits = c(-170.85, -170.53), "") +
+    annotate("text", x = -170.85, y = -14.22, 
              label = paste0(species, "\n1980-2024\nSource: GBIF & OBIS"), 
              hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") + 
-    scale_y_continuous(limits = c(-14.36940, -14.23855), "") +
-    scale_x_continuous(limits = c(-170.8375, -170.5450), "") +
     theme_minimal() + 
     theme(legend.position = c(0.92, 0.22),
-          legend.background = element_blank(),             # Transparent background
-          legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
-          legend.text = element_text(color = "white", face = "bold"),  # White and bold text
+          legend.background = element_blank(),
+          legend.key = element_rect(colour = NA, fill = NA),
+          legend.text = element_text(color = "white", face = "bold"),
           legend.title = element_text(color = "white", face = "bold"))
   
   ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_local.png"), width = 8)
