@@ -2,10 +2,10 @@ run_maxent = function(occ_sf, env, survey) {
   
   set.seed(2024)
   
-  occ_sf = occ_df
-  env = eds
+  # occ_sf = occ_df
+  # env = eds
   
-  survey = "ncrmp"
+  # survey = "ncrmp"
   
   species = unique(occ_sf$Scientific.Name)
   
