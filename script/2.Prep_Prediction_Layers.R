@@ -1,5 +1,6 @@
 library(terra)
 library(dplyr)
+library(ggplot2)
 
 rm(list = ls())
 select = dplyr::select
