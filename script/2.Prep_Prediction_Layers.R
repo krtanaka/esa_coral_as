@@ -5,8 +5,8 @@ rm(list = ls())
 select = dplyr::select
 
 df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
-df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
-df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)
@@ -70,7 +70,7 @@ names(df) <- gsub("_crw_", "_", names(df)); names(df)
 names(df) <- gsub("_noaa_", "_", names(df)); names(df)
 names(df) <- gsub("_yr01", "", names(df)); names(df)
 
-df <- df %>% mutate(bathymetry = ifelse(bathymetry < -30, NA, bathymetry))
+df <- df %>% mutate(bathymetry = ifelse(bathymetry <= -18, NA, bathymetry))
 df <- df %>% filter(!is.na(sedimentation))
 df <- df %>% filter(!is.na(bathymetry))
 df <- df %>% filter(!is.na(population_density))
