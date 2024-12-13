@@ -244,7 +244,7 @@ for (i in 2:nlyr(eds_terra)) {
   
   # Extract single layer
   eds_layer <- eds_terra[[i]]
-  plot(eds_layer)
+  # plot(eds_layer)
   
   # If needed, reproject (and resample) the layer to match df_terra 
   # If CRS is the same, this step will just resample to match resolution and extent
@@ -257,6 +257,7 @@ for (i in 2:nlyr(eds_terra)) {
   # Add the processed layer to our output stack
   eds_clipped_stack <- c(eds_clipped_stack, eds_layer_clipped)
   print(i)
+  
 }
 
 # eds_clipped_stack now contains all layers from eds, 
