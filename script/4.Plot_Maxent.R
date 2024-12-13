@@ -13,12 +13,14 @@ rm(list = ls())
 
 select = dplyr::select
 
+load("data/eds.rdata")
+
 # run "2.Prep_Prediction_Layers.R" first
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")
-survey_list <- c("ncrmp", "combined")
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1:2]
+survey_list <- c("ncrmp", "combined")[2]
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 
@@ -38,6 +40,8 @@ for (species in species_list) {
   for (survey in survey_list) {
     
     # species = "Isopora crateriformis"
+    # species = "Acropora globiceps"
+    
     # survey = "combined"
 
     file_path <- paste0("output/maxent_result_", species, "_", survey, ".rda")
@@ -64,21 +68,25 @@ for (species in species_list) {
                rowname = gsub("_viirs", "", rowname),
                rowname = gsub("distance.from.port", "distance_from_port", rowname)) %>% 
         filter(V1 > 0) %>%
-        ggplot(aes(V1, reorder(rowname, V1), fill = V1, color = V1)) +  # Reorder rowname by V1
+        ggplot(aes(V1, reorder(rowname, V1), fill = V1)) +  # Reorder rowname by V1
         labs(x = "log10 Variable Contribution (%)", y = "") +
         geom_point(shape = 21, size = 5, show.legend = FALSE) + 
         scale_x_log10(labels = scales::label_number(), limits = c(0.01, 100)) +
-        ggdark::dark_theme_classic(base_size = 15) +
+        # ggdark::dark_theme_classic(base_size = 15) +
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") + 
-        scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") +
+        # scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") +
         annotate("text", x = 0.01, y = Inf, 
                  label = species, 
                  hjust = 0, vjust = 1,
-                 size = 6, color = "white", fontface = "bold") + 
+                 size = 6, 
+                 # color = "white", 
+                 fontface = "bold") + 
         annotate("text", x = Inf, y = -Inf, 
                  label = paste0("data = ", survey), 
-                 hjust = 1, vjust = -0.5, size = 6, color = "white", fontface = "bold") + 
-        theme(axis.text.y = element_text(color = "white"),
+                 hjust = 1, vjust = -0.5, size = 6, 
+                 # color = "white", 
+                 fontface = "bold") + 
+        theme(#axis.text.y = element_text(color = "white"),
               plot.margin = margin(5, 30, 5, 5))
       
       ggsave(last_plot(),
@@ -135,15 +143,15 @@ for (species in species_list) {
       response_combined$variable <- factor(response_combined$variable, levels = var_order)
       
       response_combined  %>%
-        ggplot(aes(x = x, y = y, fill = y, color = y)) +
+        ggplot(aes(x = x, y = y, fill = y)) +
         geom_point(shape = 21, size = 1, show.legend = F) +
         facet_wrap(~variable, scales = "free") +
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
-        scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
-        ggdark::dark_theme_minimal() + 
+        # scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
+        # ggdark::dark_mode() + 
         labs(x = "", 
              y = "Predicted Suitability",
-             title = paste(species_list, "MaxEnt response curves"))
+             title = paste(species, "MaxEnt response curves"))
       
       ggsave(last_plot(), 
              filename =  file.path(paste0("output/maxent_response_", species, "_", survey, ".png")),
@@ -151,11 +159,11 @@ for (species in species_list) {
       
       response_combined %>% 
         filter(variable == "bathymetry") %>% 
-        ggplot(aes(x = x, y = y, fill = y, color = y)) +
+        ggplot(aes(x = x, y = y, fill = y)) +
         geom_point(shape = 21, size = 1, show.legend = F) +
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
-        scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
-        ggdark::dark_theme_classic() + 
+        # scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
+        # ggdark::dark_theme_classic() + 
         labs(x = "Bathymetry (m)", 
              y = "Predicted Suitability",
              title = species_list)
@@ -172,11 +180,9 @@ for (species in species_list) {
         as.numeric() %>% 
         round(2)
       
-      load("data/eds.rdata")
-      
       r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
       r <- rast(r) %>% terra::as.data.frame(xy = T)
-      r <- readAll(r)
+      # r <- readAll(r)
       save(r, file = paste0(paste0("output/maxent_raster_", species, "_", survey, ".rdata")))
       
       p1 = ggmap(map1, darken = c(0.5, "black")) +
@@ -196,7 +202,7 @@ for (species in species_list) {
                                                                             barwidth = 12, barheight = 1.5)) +
         scale_y_continuous(limits = c(-14.38, -14.22), "") +
         scale_x_continuous(limits = c(-170.85, -170.53), "") +
-        ggdark::dark_mode() + 
+        ggdark::dark_theme_minimal(base_size = 40) +
         theme(legend.position = c(0.82, 0.12),
               legend.background = element_blank(), 
               legend.box.background = element_blank(), 
@@ -214,7 +220,7 @@ for (species in species_list) {
                               breaks = c(0, 0.5, 1), guide = "none") + 
         scale_y_continuous(limits = c(-14.28128, -14.22946), "") +
         scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
-        ggdark::dark_mode() + 
+        ggdark::dark_theme_minimal(base_size = 40) +
         theme(legend.position = c(0.25, 0.9),
               legend.background = element_blank(), 
               legend.box.background = element_blank(), 
@@ -227,10 +233,12 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
-             width = 90, 
-             height = 30,
+             width = 45, 
+             height = 15,
              limitsize = FALSE,
              bg = "transparent")
+      
+      ggdark::invert_geom_defaults()
       
     } else {
       
@@ -239,5 +247,3 @@ for (species in species_list) {
     }
   }
 }
-
-
