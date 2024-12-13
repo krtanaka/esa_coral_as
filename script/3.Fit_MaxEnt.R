@@ -28,7 +28,7 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 source("script/functions.R")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 survey = c("ncrmp", "combined")[2]
 
 # Load NCRMP occurrences
