@@ -1,6 +1,7 @@
 library(dplyr)
 library(terra)
 library(readr)
+library(raster)
 
 rm(list = ls())
 
@@ -21,6 +22,10 @@ base <- rasters[[3]]
 rasters_resampled <- lapply(rasters, function(r) resample(r, base, method = "near"))
 
 fine_topo <- mean(do.call(c, rasters_resampled), na.rm = TRUE)
+
+fine_topo <- aggregate(fine_topo, fact = 10/res(fine_topo)) # aggregate to 10m resolution
+res(fine_topo)
+
 fine_topo[fine_topo >= 0] <- NA
 fine_topo[fine_topo <= -30] <- NA
 plot(fine_topo)
@@ -36,3 +41,4 @@ plot(fine_topo_latlon)
 df = readAll(raster(fine_topo_latlon))
 
 save(df, file = "data/tutuila_hybrid_5m_bathymetry.rdata")
+save(df, file = "data/tutuila_hybrid_10m_bathymetry.rdata")

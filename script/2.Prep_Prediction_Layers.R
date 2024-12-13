@@ -227,6 +227,7 @@ for (v in 6:51) {
 
 #interpolate to 5m
 load("data/tutuila_hybrid_5m_bathymetry.rdata")
+load("data/tutuila_hybrid_10m_bathymetry.rdata")
 
 # Convert RasterStack to SpatRaster
 # eds_terra <- rast(eds)
