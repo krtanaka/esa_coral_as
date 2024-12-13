@@ -222,16 +222,18 @@ for (v in 6:51) {
 }
 
 # plot(eds)
-eds = raster::stack(eds)
-eds = raster::readAll(eds)
+# eds = raster::stack(eds)
+# eds = raster::readAll(eds)
 
 #interpolate to 5m
 load("data/tutuila_hybrid_5m_bathymetry.rdata")
 
 # Convert RasterStack to SpatRaster
-eds_terra <- rast(eds)
-# eds_terra <- eds
+# eds_terra <- rast(eds)
+eds_terra <- eds
 df_terra <- rast(df)
+
+rm(eds, df)
 
 # If eds_terra does not have a CRS, assign it (assuming same as df_terra):
 crs(eds_terra) <- crs(df_terra)
@@ -248,7 +250,7 @@ for (i in 2:nlyr(eds_terra)) {
   
   # If needed, reproject (and resample) the layer to match df_terra 
   # If CRS is the same, this step will just resample to match resolution and extent
-  eds_layer_projected <- project(eds_layer, df_terra, method="bilinear")
+  eds_layer_projected <- project(eds_layer, df_terra, method = "bilinear")
   
   # Mask the projected layer using df_terra, retaining only where df_terra is not NA
   eds_layer_clipped <- mask(eds_layer_projected, df_terra)
@@ -257,6 +259,7 @@ for (i in 2:nlyr(eds_terra)) {
   # Add the processed layer to our output stack
   eds_clipped_stack <- c(eds_clipped_stack, eds_layer_clipped)
   print(i)
+  gc()
   
 }
 
@@ -268,7 +271,7 @@ names(df_terra) = "bathymetry"
 
 eds = c(df_terra, eds_clipped_stack)
 plot(eds)
-eds = stack(eds)
-eds = readAll(eds)
+eds = raster::stack(eds)
+eds = raster::readAll(eds)
 
 save(eds, file = "data/eds.rdata")
