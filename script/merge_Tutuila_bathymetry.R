@@ -22,7 +22,7 @@ rasters_resampled <- lapply(rasters, function(r) resample(r, base, method = "nea
 
 fine_topo <- mean(do.call(c, rasters_resampled), na.rm = TRUE)
 fine_topo[fine_topo >= 0] <- NA
-fine_topo[fine_topo <= -18] <- NA
+fine_topo[fine_topo <= -30] <- NA
 plot(fine_topo)
 
 # Assign the UTM Zone 2S CRS to fine_topo
@@ -36,6 +36,3 @@ plot(fine_topo_latlon)
 df = readAll(raster(fine_topo_latlon))
 
 save(df, file = "data/tutuila_hybrid_5m_bathymetry.rdata")
-
-output_path <- "G:/Environmental_Data_Summary/ESA/Bathymetry_cudem_ngs_pacioos_merged/Bathymetry_Cudem_NGS_PacIoos_merged_5m_all_units.nc"
-writeCDF(fine_topo_latlon, output_path, overwrite = TRUE)
