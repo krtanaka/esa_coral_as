@@ -27,9 +27,22 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 # Load custom functions (if any)
 source("script/functions.R")
 
+# Load environmental dataset
+load("data/eds.rdata")
+
+# Run VIF step for variable selection
+v <- usdm::vifstep(terra::rast(eds), th = 3)
+
+# Subset environmental data based on VIF results
+eds <- raster::subset(eds, v@results$Variables)
+names(eds)
+
+# Plot the environmental data
+plot(eds, col = matlab.like(100))
+
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
-survey = c("ncrmp", "combined")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+survey = c("ncrmp", "combined")[1]
 
 # Load NCRMP occurrences
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
@@ -78,19 +91,6 @@ occ_df <- occ_df %>%
          Latitude >= min(ncrmp$Latitude), Latitude <= max(ncrmp$Latitude)) %>%
   select(Longitude, Latitude, Scientific.Name) %>%
   distinct()
-
-# Load environmental dataset
-load("data/eds.rdata")
-
-# Run VIF step for variable selection
-v <- usdm::vifstep(terra::rast(eds), th = 3)
-
-# Subset environmental data based on VIF results
-eds <- raster::subset(eds, v@results$Variables)
-names(eds)
-
-# Plot the environmental data
-plot(eds, col = matlab.like(100))
 
 # Run Maxent model
 maxent_results <- run_maxent(occ_df, eds, survey)
