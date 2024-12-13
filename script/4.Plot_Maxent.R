@@ -37,7 +37,7 @@ map2 = ggmap::get_map(location = c(-170.68846, -14.25177),
 for (species in species_list) {
   for (survey in survey_list) {
     
-    # species = "Acropora globiceps"
+    # species = "Isopora crateriformis"
     # survey = "combined"
 
     file_path <- paste0("output/maxent_result_", species, "_", survey, ".rda")
@@ -175,12 +175,12 @@ for (species in species_list) {
       load("data/eds.rdata")
       
       r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
+      r <- rast(r) %>% terra::as.data.frame(xy = T)
       r <- readAll(r)
       save(r, file = paste0(paste0("output/maxent_raster_", species, "_", survey, ".rdata")))
-      r <- rasterToPoints(r) %>% as.data.frame()
       
       p1 = ggmap(map1, darken = c(0.5, "black")) +
-        geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
+        geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), size = 0.01,
                            size = 0.5,
                            shape = 22, alpha = 0.8, crs = 4326) + 
         annotate("text", x = -170.85, y = -14.22,
@@ -206,7 +206,7 @@ for (species in species_list) {
               plot.background = element_rect(fill = "black", color = NA))
       
       p2 = ggmap(map2, darken = c(0.5, "black")) +
-        geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), 
+        geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), size = 0.01,
                            shape = 22, alpha = 0.8, crs = 4326) + 
         scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
                              breaks = c(0, 0.5, 1), guide = "none") + 
@@ -223,11 +223,14 @@ for (species in species_list) {
               panel.background = element_rect(fill = "black", color = NA),
               plot.background = element_rect(fill = "black", color = NA))
       
-      p1 + p2
+      combined_plot <- p1 + p2
       
-      ggsave(last_plot(), 
+      ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
-             width = 16, bg = "transparent")
+             width = 90, 
+             height = 30,
+             limitsize = FALSE,
+             bg = "transparent")
       
     } else {
       
