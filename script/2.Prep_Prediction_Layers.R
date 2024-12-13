@@ -221,16 +221,16 @@ for (v in 6:51) {
   
 }
 
-plot(eds)
-eds = stack(eds)
-eds = readAll(eds)
+# plot(eds)
+eds = raster::stack(eds)
+eds = raster::readAll(eds)
 
 #interpolate to 5m
-
 load("data/tutuila_hybrid_5m_bathymetry.rdata")
 
 # Convert RasterStack to SpatRaster
 eds_terra <- rast(eds)
+# eds_terra <- eds
 df_terra <- rast(df)
 
 # If eds_terra does not have a CRS, assign it (assuming same as df_terra):
