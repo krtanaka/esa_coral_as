@@ -6,8 +6,8 @@ rm(list = ls())
 select = dplyr::select
 
 df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
-# df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
-# df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)
@@ -245,9 +245,11 @@ eds_clipped_stack <- rast()
 # Loop through each layer in eds_terra
 for (i in 2:nlyr(eds_terra)) {
   
+  i = 10
+  
   # Extract single layer
   eds_layer <- eds_terra[[i]]
-  # plot(eds_layer)
+  plot(eds_layer)
   
   # If needed, reproject (and resample) the layer to match df_terra 
   # If CRS is the same, this step will just resample to match resolution and extent
@@ -255,7 +257,7 @@ for (i in 2:nlyr(eds_terra)) {
   
   # Mask the projected layer using df_terra, retaining only where df_terra is not NA
   eds_layer_clipped <- mask(eds_layer_projected, df_terra)
-  # plot(eds_layer_clipped)
+  plot(eds_layer_clipped)
   
   # Add the processed layer to our output stack
   eds_clipped_stack <- c(eds_clipped_stack, eds_layer_clipped)
