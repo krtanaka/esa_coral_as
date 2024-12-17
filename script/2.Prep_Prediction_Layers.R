@@ -5,9 +5,9 @@ library(ggplot2)
 rm(list = ls())
 select = dplyr::select
 
-df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
 df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
-df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
 names(df) <- gsub("Weekly", "weekly", names(df)); names(df)
@@ -71,7 +71,7 @@ names(df) <- gsub("_crw_", "_", names(df)); names(df)
 names(df) <- gsub("_noaa_", "_", names(df)); names(df)
 names(df) <- gsub("_yr01", "", names(df)); names(df)
 
-df <- df %>% mutate(bathymetry = ifelse(bathymetry <= -18, NA, bathymetry))
+# df <- df %>% mutate(bathymetry = ifelse(bathymetry <= -18, NA, bathymetry))
 df <- df %>% filter(!is.na(sedimentation))
 df <- df %>% filter(!is.na(bathymetry))
 df <- df %>% filter(!is.na(population_density))
@@ -245,19 +245,19 @@ eds_clipped_stack <- rast()
 # Loop through each layer in eds_terra
 for (i in 2:nlyr(eds_terra)) {
   
-  i = 10
+  # i = 10
   
   # Extract single layer
   eds_layer <- eds_terra[[i]]
-  plot(eds_layer)
+  # plot(eds_layer)
   
-  # If needed, reproject (and resample) the layer to match df_terra 
+  # If needed, reproject (and resample) the layer to match df_terra
   # If CRS is the same, this step will just resample to match resolution and extent
   eds_layer_projected <- project(eds_layer, df_terra, method = "bilinear")
   
   # Mask the projected layer using df_terra, retaining only where df_terra is not NA
   eds_layer_clipped <- mask(eds_layer_projected, df_terra)
-  plot(eds_layer_clipped)
+  # plot(eds_layer_clipped)
   
   # Add the processed layer to our output stack
   eds_clipped_stack <- c(eds_clipped_stack, eds_layer_clipped)
@@ -278,3 +278,11 @@ eds = raster::stack(eds)
 eds = raster::readAll(eds)
 
 save(eds, file = "data/eds.rdata")
+
+eds = c(df_terra, eds_clipped_stack)
+eds[["bathymetry"]][eds[["bathymetry"]] <= -18] <- NA
+eds <- mask(eds, eds[["bathymetry"]])
+plot(eds)
+eds = raster::stack(eds)
+eds = raster::readAll(eds)
+save(eds, file = "/Users/Kisei.Tanaka/Desktop/eds.rdata")
