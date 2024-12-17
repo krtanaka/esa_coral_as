@@ -273,16 +273,29 @@ plot(eds_clipped_stack)
 names(df_terra) = "bathymetry"
 
 eds = c(df_terra, eds_clipped_stack)
-plot(eds)
+
+# Run VIF step for variable selection
+# note, this VIF selection was done at EDS outputs resolution : 0.005, 0.005
+# v <- usdm::vifstep(terra::rast(eds), th = 3)
+v <- usdm::vifstep(eds, th = 3)
+save(v, file = "output/vif.RData")
+load("output/vif.RData")
+
+# Subset environmental data based on VIF results
+eds <- raster::subset(eds, v@results$Variables)
+names(eds)
+
+# Plot the environmental data
+plot(eds, col = colorRamps::matlab.like(100))
+
 eds = raster::stack(eds)
 eds = raster::readAll(eds)
 
 save(eds, file = "data/eds.rdata")
 
-eds = c(df_terra, eds_clipped_stack)
+# for Kira's environmental layer maps 0-18m
 eds[["bathymetry"]][eds[["bathymetry"]] <= -18] <- NA
 eds <- mask(eds, eds[["bathymetry"]])
 plot(eds)
-eds = raster::stack(eds)
 eds = raster::readAll(eds)
 save(eds, file = "/Users/Kisei.Tanaka/Desktop/eds.rdata")

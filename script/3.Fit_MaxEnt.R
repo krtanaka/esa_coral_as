@@ -30,20 +30,6 @@ source("script/functions.R")
 # Load environmental dataset
 load("data/eds.rdata")
 
-# Run VIF step for variable selection
-# note, this VIF selection was done at EDS outputs resolution : 0.005, 0.005
-# v <- usdm::vifstep(terra::rast(eds), th = 3)
-# v <- usdm::vifstep(eds, th = 3)
-# save(v, file = "output/vif.RData")
-load("output/vif.RData")
-
-# Subset environmental data based on VIF results
-eds <- raster::subset(eds, v@results$Variables)
-names(eds)
-
-# Plot the environmental data
-plot(eds, col = matlab.like(100))
-
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
 survey = c("ncrmp", "combined")[1]
