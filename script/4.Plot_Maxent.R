@@ -20,7 +20,7 @@ load("data/eds.rdata")
 source("script/functions.R")
 
 species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1:2]
-survey_list <- c("ncrmp", "combined")[2]
+survey_list <- c("ncrmp", "combined")
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 
