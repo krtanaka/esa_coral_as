@@ -19,7 +19,7 @@ load("data/eds.rdata")
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1:2]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 survey_list <- c("ncrmp", "combined")
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
@@ -43,7 +43,7 @@ for (species in species_list) {
     # species = "Acropora globiceps"
     
     # survey = "combined"
-
+    
     file_path <- paste0("output/maxent_result_", species, "_", survey, ".rda")
     
     if (file.exists(file_path)) {
@@ -71,23 +71,24 @@ for (species in species_list) {
         ggplot(aes(V1, reorder(rowname, V1), fill = V1)) +  # Reorder rowname by V1
         labs(x = "log10 Variable Contribution (%)", y = "") +
         geom_point(shape = 21, size = 5, show.legend = FALSE) + 
-        scale_x_log10(labels = scales::label_number(), limits = c(0.01, 100)) +
+        scale_x_log10(labels = scales::label_number(), limits = c(0.001, 100)) +
         # ggdark::dark_theme_classic(base_size = 15) +
-        scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") + 
-        # scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") +
-        annotate("text", x = 0.01, y = Inf, 
+        theme_classic(base_size = 20) + 
+        scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") +
+        scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") +
+        annotate("text", x = 0.001, y = Inf, 
                  label = species, 
                  hjust = 0, vjust = 1,
                  size = 6, 
                  # color = "white", 
                  fontface = "bold") + 
         annotate("text", x = Inf, y = -Inf, 
-                 label = paste0("data = ", survey), 
+                 label = paste0("survey data = ", survey), 
                  hjust = 1, vjust = -0.5, size = 6, 
                  # color = "white", 
                  fontface = "bold") + 
         theme(#axis.text.y = element_text(color = "white"),
-              plot.margin = margin(5, 30, 5, 5))
+          plot.margin = margin(5, 30, 5, 5))
       
       ggsave(last_plot(),
              filename = file.path(paste0("output/maxent_vart_", species, "_", survey, ".png")),
@@ -143,12 +144,13 @@ for (species in species_list) {
       response_combined$variable <- factor(response_combined$variable, levels = var_order)
       
       response_combined  %>%
-        ggplot(aes(x = x, y = y, fill = y)) +
-        geom_point(shape = 21, size = 1, show.legend = F) +
+        ggplot(aes(x = x, y = y, fill = y, color = y)) +
+        geom_point(shape = 21, size = 2, show.legend = F, alpha = 0.5) +
         facet_wrap(~variable, scales = "free") +
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
-        # scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
+        scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
         # ggdark::dark_mode() + 
+        theme_cowplot() + 
         labs(x = "", 
              y = "Predicted Suitability",
              title = paste(species, "MaxEnt response curves"))
@@ -159,11 +161,13 @@ for (species in species_list) {
       
       response_combined %>% 
         filter(variable == "bathymetry") %>% 
-        ggplot(aes(x = x, y = y, fill = y)) +
-        geom_point(shape = 21, size = 1, show.legend = F) +
+        ggplot(aes(x = x, y = y, fill = y, color = y)) +
+        geom_point(shape = 21, size = 3, show.legend = F, alpha = 0.5) +
+        facet_wrap(~variable, scales = "free") +
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
-        # scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
-        # ggdark::dark_theme_classic() + 
+        scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
+        # ggdark::dark_mode() + 
+        theme_cowplot() + 
         labs(x = "Bathymetry (m)", 
              y = "Predicted Suitability",
              title = species_list)
@@ -180,17 +184,15 @@ for (species in species_list) {
         as.numeric() %>% 
         round(2)
       
-      r <- predict(maxent_result$model, eds); plot(r, col = matlab.like(100))
+      r <- predict(maxent_result$model, eds)#; plot(r, col = matlab.like(100))
       r <- rast(r) %>% terra::as.data.frame(xy = T)
       # r <- readAll(r)
       save(r, file = paste0(paste0("output/maxent_raster_", species, "_", survey, ".rdata")))
       
-      p1 = ggmap(map1, darken = c(0.5, "black")) +
-        geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), size = 0.01,
-                           size = 0.5,
-                           shape = 22, alpha = 0.8, crs = 4326) + 
+      p1 = ggmap(map1) +
+        geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
         annotate("text", x = -170.85, y = -14.22,
-                 label = paste0(species, "\nauc = ", auc, "\nsurvey = ", survey),
+                 label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
                  hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
         scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1), 
                              breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal", 
@@ -202,39 +204,39 @@ for (species in species_list) {
                                                                             barwidth = 12, barheight = 1.5)) +
         scale_y_continuous(limits = c(-14.38, -14.22), "") +
         scale_x_continuous(limits = c(-170.85, -170.53), "") +
-        ggdark::dark_theme_minimal(base_size = 40) +
-        theme(legend.position = c(0.82, 0.12),
+        theme(legend.position = c(0.8, 0.12),
               legend.background = element_blank(), 
               legend.box.background = element_blank(), 
               legend.text = element_text(color = "white", size = 10, face = "bold"), 
               legend.title = element_text(color = "white", face = "bold"),
               panel.background = element_rect(fill = "black", color = NA),
-              plot.background = element_rect(fill = "black", color = NA))
+              plot.background = element_rect(fill = "black", color = NA)) + 
+        coord_sf(crs = 4326)
       
       p2 = ggmap(map2, darken = c(0.5, "black")) +
-        geom_spatial_point(data = r, aes(x, y, fill = layer, color = layer), size = 0.01,
-                           shape = 22, alpha = 0.8, crs = 4326) + 
+        geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
         scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
                              breaks = c(0, 0.5, 1), guide = "none") + 
         scale_color_gradientn(colors = matlab.like(100), limits = c(0,1), 
                               breaks = c(0, 0.5, 1), guide = "none") + 
         scale_y_continuous(limits = c(-14.28128, -14.22946), "") +
         scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
-        ggdark::dark_theme_minimal(base_size = 40) +
+        theme_map() + 
         theme(legend.position = c(0.25, 0.9),
               legend.background = element_blank(), 
               legend.box.background = element_blank(), 
               legend.text = element_text(color = "white", size = 10, face = "bold"), 
               legend.title = element_text(color = "white", face = "bold"),
               panel.background = element_rect(fill = "black", color = NA),
-              plot.background = element_rect(fill = "black", color = NA))
+              plot.background = element_rect(fill = "black", color = NA)) + 
+        coord_sf(crs = 4326)
       
       combined_plot <- p1 + p2
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
-             width = 45, 
-             height = 15,
+             width = 18, 
+             height = 6,
              limitsize = FALSE,
              bg = "transparent")
       
