@@ -8,6 +8,7 @@ library(ggspatial)
 library(tidyverse)
 library(dismo)
 library(patchwork)
+library(cowplot)
 
 rm(list = ls())
 
