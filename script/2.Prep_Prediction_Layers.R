@@ -5,8 +5,8 @@ library(ggplot2)
 rm(list = ls())
 select = dplyr::select
 
-# df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
-df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
 # df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
@@ -71,7 +71,7 @@ names(df) <- gsub("_crw_", "_", names(df)); names(df)
 names(df) <- gsub("_noaa_", "_", names(df)); names(df)
 names(df) <- gsub("_yr01", "", names(df)); names(df)
 
-# df <- df %>% mutate(bathymetry = ifelse(bathymetry <= -18, NA, bathymetry))
+df <- df %>% mutate(bathymetry = ifelse(bathymetry <= -30, NA, bathymetry))
 df <- df %>% filter(!is.na(sedimentation))
 df <- df %>% filter(!is.na(bathymetry))
 df <- df %>% filter(!is.na(population_density))
@@ -202,7 +202,7 @@ visdat::vis_miss(df, warn_large_data = F)
 
 eds <- rast()
 
-for (v in 6:51) {
+for (v in 6:ncol(df)) {
   
   var_name <- colnames(df)[v]
   
@@ -221,9 +221,14 @@ for (v in 6:51) {
   
 }
 
-# plot(eds)
-# eds = raster::stack(eds)
-# eds = raster::readAll(eds)
+plot(eds)
+# Subset environmental data based on VIF results
+load("output/vif.RData")
+eds <- raster::subset(eds, v@results$Variables)
+names(eds)
+eds = raster::stack(eds)
+eds = raster::readAll(eds)
+save(eds, file = "data/eds.rdata")
 
 #interpolate to 5m
 load("data/tutuila_hybrid_5m_bathymetry.rdata")
