@@ -19,7 +19,7 @@ load("data/eds.rdata")
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1:2]
 survey_list <- c("ncrmp", "combined")
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
@@ -82,11 +82,11 @@ for (species in species_list) {
                  size = 6, 
                  # color = "white", 
                  fontface = "bold") + 
-        annotate("text", x = Inf, y = -Inf, 
-                 label = paste0("survey data = ", survey), 
-                 hjust = 1, vjust = -0.5, size = 6, 
-                 # color = "white", 
-                 fontface = "bold") + 
+        # annotate("text", x = Inf, y = -Inf, 
+        #          label = paste0("survey data = ", survey), 
+        #          hjust = 1, vjust = -0.5, size = 6, 
+        #          # color = "white", 
+        #          fontface = "bold") + 
         theme(#axis.text.y = element_text(color = "white"),
           plot.margin = margin(5, 30, 5, 5))
       
@@ -146,7 +146,7 @@ for (species in species_list) {
       response_combined  %>%
         ggplot(aes(x = x, y = y, fill = y, color = y)) +
         geom_point(shape = 21, size = 2, show.legend = F, alpha = 0.5) +
-        facet_wrap(~variable, scales = "free") +
+        facet_wrap(~variable, scales = "free", ncol = 3) +
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
         scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
         # ggdark::dark_mode() + 
@@ -157,7 +157,7 @@ for (species in species_list) {
       
       ggsave(last_plot(), 
              filename =  file.path(paste0("output/maxent_response_", species, "_", survey, ".png")),
-             height = 6, width = 9)
+             height = 9, width = 9)
       
       response_combined %>% 
         filter(variable == "bathymetry") %>% 
@@ -204,13 +204,12 @@ for (species in species_list) {
                                                                             barwidth = 12, barheight = 1.5)) +
         scale_y_continuous(limits = c(-14.38, -14.22), "") +
         scale_x_continuous(limits = c(-170.85, -170.53), "") +
+        theme_minimal(base_size = 10) + 
         theme(legend.position = c(0.8, 0.12),
               legend.background = element_blank(), 
               legend.box.background = element_blank(), 
               legend.text = element_text(color = "white", size = 10, face = "bold"), 
-              legend.title = element_text(color = "white", face = "bold"),
-              panel.background = element_rect(fill = "black", color = NA),
-              plot.background = element_rect(fill = "black", color = NA)) + 
+              legend.title = element_text(color = "white", face = "bold")) + 
         coord_sf(crs = 4326)
       
       p2 = ggmap(map2, darken = c(0.5, "black")) +
@@ -221,14 +220,7 @@ for (species in species_list) {
                               breaks = c(0, 0.5, 1), guide = "none") + 
         scale_y_continuous(limits = c(-14.28128, -14.22946), "") +
         scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
-        theme_map() + 
-        theme(legend.position = c(0.25, 0.9),
-              legend.background = element_blank(), 
-              legend.box.background = element_blank(), 
-              legend.text = element_text(color = "white", size = 10, face = "bold"), 
-              legend.title = element_text(color = "white", face = "bold"),
-              panel.background = element_rect(fill = "black", color = NA),
-              plot.background = element_rect(fill = "black", color = NA)) + 
+        theme_minimal(base_size = 10) + 
         coord_sf(crs = 4326)
       
       combined_plot <- p1 + p2
