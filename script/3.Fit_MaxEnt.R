@@ -32,25 +32,26 @@ load("data/eds.rdata")
 
 # Define species list and select the species
 species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
-survey = c("ncrmp", "combined")[2]
+survey <- c("ncrmp", "combined", "no_nps")[3]
 
 # Load NCRMP occurrences
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
 
-# Set file paths based on the model
-file_paths <- if (survey == "ncrmp") {
-  
-  list(ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"))
-  
-} else {
-  
-  list(
-    ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
-    gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
-    nps = paste0("data/occurances_", species, "_nps.csv"),
-    crag = paste0("data/occurances_", species, "_crag.csv")
-  )
-}
+# Set file paths based on the survey type
+file_paths <- switch(survey,
+                     
+                     ncrmp = list(ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv")),
+                     
+                     combined = list(
+                       ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
+                       gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
+                       crag = paste0("data/occurances_", species, "_crag.csv")),
+                     
+                     no_nps = list(
+                       ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
+                       gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
+                       crag = paste0("data/occurances_", species, "_crag.csv"))
+                     )
 
 # Initialize an empty list to store the data frames
 data_list <- list()

@@ -58,6 +58,7 @@ p1 = ggmap(map)+
                         breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
                                                                       title.position = "top",
                                                                       barwidth = 10, barheight = 0.8)) +
+  labs(title = species) +
   theme(legend.position = c(0.22, 0.9),
         legend.background = element_blank(), 
         legend.box.background = element_blank(), 
@@ -166,11 +167,12 @@ ggplot(confusion_matrix_df, aes(x = as.factor(Prediction), y = as.factor(Referen
     fill = "black"
   ) +  # Add text with white outline and black fill
   labs(
-    # title = species,
+    title = species,
     x = "Prediction",
     y = "Reference"
   ) +
   coord_fixed() +
-  theme_minimal(base_size = 15)
+  theme_minimal(base_size = 15) + 
+  theme(panel.grid.major = element_blank())
 
 ggsave(last_plot(), file = paste0("output/confusion_", species, ".png"), height = 5, bg = "transparent")

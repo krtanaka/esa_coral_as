@@ -153,11 +153,13 @@ for (species in species_list) {
         theme_pubr() + 
         labs(x = "", 
              y = "Predicted Suitability",
-             title = paste(species, "MaxEnt response curves"))
+             title = species
+             # title = paste(species, "MaxEnt response curves")
+             )
       
       ggsave(last_plot(), 
              filename =  file.path(paste0("output/maxent_response_", species, "_", survey, ".png")),
-             height = 9, width = 9)
+             height = 9, width = 8)
       
       response_combined %>% 
         filter(variable == "bathymetry") %>% 
@@ -228,15 +230,15 @@ for (species in species_list) {
         geom_raster(data = r, aes(x = x, y = y, fill = layer)) +
         annotate("text", x = -170.85, y = -14.22,
                  label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
-                 hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
-        scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                 hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
+        scale_fill_gradientn(colors = matlab.like(100), "Predicted Habitat Suitability", limits = c(0,1),
                              breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
                                                                            title.position = "top",
-                                                                           barwidth = 12, barheight = 1.5)) +
-        scale_color_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                                                                           barwidth = 9.5, barheight = 1)) +
+        scale_color_gradientn(colors = matlab.like(100), "Predicted Habitat Suitability", limits = c(0,1),
                               breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
                                                                             title.position = "top",
-                                                                            barwidth = 12, barheight = 1.5)) +
+                                                                            barwidth = 9.5, barheight = 1)) +
         scale_y_continuous(limits = c(-14.38, -14.22), "") +
         scale_x_continuous(limits = c(-170.85, -170.53), "") +
         theme_minimal(base_size = 10) + 
@@ -262,25 +264,25 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
-             width = 18, 
+             width = 13, 
              height = 6,
              limitsize = FALSE,
              bg = "transparent")
       
       p1 = ggmap(map1) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 2, alpha = 0.98) + 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 2, alpha = 0.9) + 
         annotate("text", x = -170.85, y = -14.22,
                  label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
-                 hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
-        scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                 hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
+        scale_fill_gradientn(colors = matlab.like(100), "Predicted Habitat Suitability", limits = c(0,1),
                              breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
                                                                            title.position = "top",
-                                                                           barwidth = 12, barheight = 1.5)) +
-        scale_color_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                                                                           barwidth = 9.5, barheight = 1)) +
+        scale_color_gradientn(colors = matlab.like(100), "Predicted Habitat Suitability", limits = c(0,1),
                               breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
                                                                             title.position = "top",
-                                                                            barwidth = 12, barheight = 1.5)) +
+                                                                            barwidth = 9.5, barheight = 1)) +
         scale_y_continuous(limits = c(-14.38, -14.22), "") +
         scale_x_continuous(limits = c(-170.85, -170.53), "") +
         theme_minimal(base_size = 10) + 
@@ -295,21 +297,21 @@ for (species in species_list) {
       
       p2 = ggmap(map2) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", size = 3, alpha = 0.98) + 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", size = 3, alpha = 0.9) + 
         scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
                              breaks = c(0, 0.5, 1), guide = "none") + 
         scale_color_gradientn(colors = matlab.like(100), limits = c(0,1), 
                               breaks = c(0, 0.5, 1), guide = "none") + 
         scale_y_continuous(limits = c(-14.28128, -14.22946), "") +
         scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
-        theme_minimal(base_size = 10) + 
+        theme_minimal(base_size = 10) +
         coord_sf(crs = 4326)
       
       combined_plot <- p1 + p2
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", "surveypoints.png")), 
-             width = 18, 
+             width = 13, 
              height = 6,
              limitsize = FALSE,
              bg = "transparent")

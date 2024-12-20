@@ -4,8 +4,7 @@ run_maxent = function(occ_sf, env, survey) {
   
   # occ_sf = occ_df
   # env = eds
-  
-  # survey = "ncrmp"
+  # survey = "no_nps"
   
   species = unique(occ_sf$Scientific.Name)
   
@@ -116,12 +115,12 @@ run_maxent = function(occ_sf, env, survey) {
       removeDuplicates = T
     )
     
-    # Run MaXent SDM
-    sp_maxent_model = dismo::maxent(env,
-                                    as.matrix(occ_sp),
-                                    features = maxent_feats,
-                                    betamultiplier = maxent_rm,
-                                    removeDuplicates = T)
+    # # Run MaXent SDM
+    # sp_maxent_model = dismo::maxent(env,
+    #                                 as.matrix(occ_sp),
+    #                                 features = maxent_feats,
+    #                                 betamultiplier = maxent_rm,
+    #                                 removeDuplicates = T)
     
     # Store maxent model
     maxent_result = list(enm = enmeval_df, model = sp_maxent_model)
