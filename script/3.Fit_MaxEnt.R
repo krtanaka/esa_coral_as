@@ -31,7 +31,7 @@ source("script/functions.R")
 load("data/eds.rdata")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 survey <- c("ncrmp", "combined", "no_nps")[3]
 
 # Load NCRMP occurrences
