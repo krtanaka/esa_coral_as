@@ -5,33 +5,76 @@ library(ggplot2)
 
 rm(list = ls())
 
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
-load(paste0("output/maxent_raster_", species, ".rdata"))
-predicted_suitability <- r
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+load(paste0("output/maxent_raster_", species, "_ncrmp.rdata"))
+# load(paste0("output/maxent_raster_", species, "_combined.rdata"))
+
+predicted_suitability = rasterFromXYZ(r)
 
 species_csv <- list(
   "Acropora globiceps" = "A_globiceps_AS.csv",
   "Isopora crateriformis" = "I_craterformis_AS.csv"
 )
 
-# Dynamically load the appropriate CSV based on the selected species
-validation_data <- read_csv(paste0("data/original_data/", species_csv[[species]])) %>%
-  filter(ISLAND == "Tutuila") %>% 
-  mutate(longitude = LONGITUDE, latitude = LATITUDE) %>%
-  group_by(longitude, latitude) %>%
-  summarise(presence = ifelse(AdColCount > 0, 1, 0)) %>% 
-  na.omit()
+# use NPS data because CRAG and gbif are occurrence only
+load("data/npsa_benthic_data.rdata")
+
+validation_data = df %>% 
+  filter(#Loc_Type == "Fixed",
+    Latitude >= -14.38, Latitude <= -14.22,
+    Longitude >= -170.85, Longitude <= -170.53) %>%
+  mutate(y = as.integer(Taxon_Name == species)) %>%
+  group_by(Longitude, Latitude) %>%
+  summarize(presence = if_else(any(y > 0, na.rm = TRUE), 1, 0), .groups = "drop") %>%
+  distinct() %>%
+  na.omit() %>%
+  rename_with(tolower)
+
+table(validation_data$presence)
 
 # Extract predicted suitability values at the locations of validation points
 coordinates <- cbind(validation_data$longitude, validation_data$latitude)
 validation_data$predicted_suitability <- raster::extract(predicted_suitability, coordinates)
 
-ggplot()+ 
-  geom_point(data = validation_data, aes(longitude, latitude, fill = predicted_suitability), shape = 21) + 
-  geom_point(data = validation_data %>% filter(presence == 1), aes(longitude, latitude, fill = presence), shape = 22)
+ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
+
+# Get map for the given coordinates
+map = ggmap::get_map(location = c(mean(validation_data$longitude), mean(validation_data$latitude)),
+                     maptype = "satellite",
+                     zoom = 13,
+                     color = "bw",
+                     force = TRUE)
+
+p1 = ggmap(map)+ 
+  geom_point(data = validation_data, aes(longitude, latitude, fill = predicted_suitability, color = predicted_suitability), shape = 21, size = 3, alpha = 0.5) + 
+  geom_point(data = validation_data %>% filter(presence == 1), aes(longitude, latitude), fill = "red", shape = 21, size = 3) + 
+  scale_y_continuous(limits =  range(validation_data$latitude), name = NULL) +
+  scale_x_continuous(limits =  range(validation_data$longitude), name = NULL) +
+  scale_fill_viridis_c("Predicted Habitat Suitability", limits = c(0,1),
+                       breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
+                                                                     title.position = "top",
+                                                                     barwidth = 10, barheight = 0.8)) +
+  scale_color_viridis_c("Predicted Habitat Suitability", limits = c(0,1),
+                        breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
+                                                                      title.position = "top",
+                                                                      barwidth = 10, barheight = 0.8)) +
+  theme(legend.position = c(0.22, 0.9),
+        legend.background = element_blank(), 
+        legend.box.background = element_blank(), 
+        legend.text = element_text(color = "white", size = 10, face = "bold"), 
+        legend.title = element_text(color = "white", face = "bold")) + 
+  coord_sf(crs = 4326)
+
+ggsave(plot = p1,
+       filename =  file.path(paste0("output/maxent_map_", species, "_suitability_extracted.png")), 
+       width = 6, 
+       height = 4.5,
+       limitsize = FALSE,
+       bg = "transparent")
 
 # Calculate ROC curve and AUC
 roc_obj <- roc(validation_data$presence, validation_data$predicted_suitability)
+
 # Print the ROC object to check its contents
 print(roc_obj)
 
@@ -78,7 +121,8 @@ ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
     x = "False Positive Rate",
     y = "True Positive Rate"
   ) +
-  ggdark::dark_theme_minimal(base_size = 15) + 
+  # ggdark::dark_theme_minimal(base_size = 15) + 
+  theme_classic(base_size = 15) + 
   coord_fixed()
 
 # Save the plot with a transparent background
@@ -106,17 +150,27 @@ print(confusion_matrix)
 # Create a confusion matrix as a data frame
 confusion_matrix_df = confusion_matrix$table %>% as.data.frame()
 
+confusion_matrix_df <- confusion_matrix_df %>%
+  mutate(Freq = Freq / sum(Freq),
+         Freq = round(Freq, 2))
+
 # Plot the confusion matrix using ggplot
 ggplot(confusion_matrix_df, aes(x = as.factor(Prediction), y = as.factor(Reference), fill = Freq)) +
-  geom_tile(color = "white", show.legend = F) +  # Create the heatmap tiles
-  geom_text(aes(label = Freq), size = 10) +  # Add the counts as text on the tiles
-  scale_fill_gradientn(colors = matlab.like(100)) +  # Color gradient for the counts
+  geom_tile(color = "white", show.legend = FALSE) +  # Create the heatmap tiles
+  geom_text(
+    aes(label = Freq), 
+    size = 10, 
+    color = "white", 
+    stroke = 0.5, 
+    fontface = "bold", 
+    fill = "black"
+  ) +  # Add text with white outline and black fill
   labs(
-    title = species,
+    # title = species,
     x = "Prediction",
     y = "Reference"
   ) +
-  coord_fixed() + 
-  ggdark::dark_theme_minimal(base_size = 15)
+  coord_fixed() +
+  theme_minimal(base_size = 15)
 
 ggsave(last_plot(), file = paste0("output/confusion_", species, ".png"), height = 5, bg = "transparent")

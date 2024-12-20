@@ -42,7 +42,6 @@ for (species in species_list) {
     
     # species = "Isopora crateriformis"
     # species = "Acropora globiceps"
-    
     # survey = "combined"
     
     file_path <- paste0("output/maxent_result_", species, "_", survey, ".rda")
@@ -146,12 +145,12 @@ for (species in species_list) {
       
       response_combined  %>%
         ggplot(aes(x = x, y = y, fill = y, color = y)) +
-        geom_point(shape = 21, size = 2, show.legend = F, alpha = 0.5) +
+        geom_point(shape = 21, size = 3, show.legend = F, alpha = 0.5) +
         facet_wrap(~variable, scales = "free", ncol = 3) +
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
         scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
         # ggdark::dark_mode() + 
-        theme_cowplot() + 
+        theme_pubr() + 
         labs(x = "", 
              y = "Predicted Suitability",
              title = paste(species, "MaxEnt response curves"))
@@ -168,7 +167,7 @@ for (species in species_list) {
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
         scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "sqrt") +
         # ggdark::dark_mode() + 
-        theme_cowplot() + 
+        theme_pubr() + 
         labs(x = "Bathymetry (m)", 
              y = "Predicted Suitability",
              title = species_list)
@@ -190,18 +189,53 @@ for (species in species_list) {
       # r <- readAll(r)
       save(r, file = paste0(paste0("output/maxent_raster_", species, "_", survey, ".rdata")))
       
+      # Load NCRMP occurrences
+      ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
+      
+      # Set file paths based on the model
+      file_paths <- if (survey == "ncrmp") {
+        
+        list(ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"))
+        
+      } else {
+        
+        list(
+          ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
+          gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
+          nps = paste0("data/occurances_", species, "_nps.csv"),
+          crag = paste0("data/occurances_", species, "_crag.csv")
+        )
+      }
+      
+      # Initialize an empty list to store the data frames
+      data_list <- list()
+      
+      # Read the files if they exist
+      for (dataset in names(file_paths)) {
+        if (file.exists(file_paths[[dataset]])) {
+          data <- read_csv(file_paths[[dataset]]) %>%
+            select(Longitude, Latitude, Scientific.Name, Source)
+          data_list[[dataset]] <- data
+        }
+      }
+      
+      # Combine all available datasets
+      occ_df <- bind_rows(data_list) %>%
+        filter(Latitude >= -14.38, Latitude <= -14.22,
+               Longitude >= -170.85, Longitude <= -170.53)
+      
       p1 = ggmap(map1) +
-        geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
+        geom_raster(data = r, aes(x = x, y = y, fill = layer)) +
         annotate("text", x = -170.85, y = -14.22,
                  label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
                  hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
-        scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1), 
-                             breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal", 
-                                                                           title.position = "top", 
+        scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                             breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
+                                                                           title.position = "top",
                                                                            barwidth = 12, barheight = 1.5)) +
-        scale_color_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1), 
-                              breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal", 
-                                                                            title.position = "top", 
+        scale_color_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                              breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
+                                                                            title.position = "top",
                                                                             barwidth = 12, barheight = 1.5)) +
         scale_y_continuous(limits = c(-14.38, -14.22), "") +
         scale_x_continuous(limits = c(-170.85, -170.53), "") +
@@ -214,7 +248,7 @@ for (species in species_list) {
         coord_sf(crs = 4326)
       
       p2 = ggmap(map2, darken = c(0.5, "black")) +
-        geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
+        geom_raster(data = r, aes(x = x, y = y, fill = layer)) +
         scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
                              breaks = c(0, 0.5, 1), guide = "none") + 
         scale_color_gradientn(colors = matlab.like(100), limits = c(0,1), 
@@ -228,6 +262,53 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
+             width = 18, 
+             height = 6,
+             limitsize = FALSE,
+             bg = "transparent")
+      
+      p1 = ggmap(map1) +
+        geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 2, alpha = 0.98) + 
+        annotate("text", x = -170.85, y = -14.22,
+                 label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
+                 hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") +
+        scale_fill_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                             breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
+                                                                           title.position = "top",
+                                                                           barwidth = 12, barheight = 1.5)) +
+        scale_color_gradientn(colors = matlab.like(100), "Predicted Occurance Probability", limits = c(0,1),
+                              breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
+                                                                            title.position = "top",
+                                                                            barwidth = 12, barheight = 1.5)) +
+        scale_y_continuous(limits = c(-14.38, -14.22), "") +
+        scale_x_continuous(limits = c(-170.85, -170.53), "") +
+        theme_minimal(base_size = 10) + 
+        theme(legend.position = c(0.8, 0.12),
+              panel.background = element_rect(fill = "gray80"),
+              panel.grid.major = element_blank(),
+              legend.background = element_blank(), 
+              legend.box.background = element_blank(), 
+              legend.text = element_text(color = "white", size = 10, face = "bold"), 
+              legend.title = element_text(color = "white", face = "bold")) + 
+        coord_sf(crs = 4326)
+      
+      p2 = ggmap(map2) +
+        geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", size = 3, alpha = 0.98) + 
+        scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
+                             breaks = c(0, 0.5, 1), guide = "none") + 
+        scale_color_gradientn(colors = matlab.like(100), limits = c(0,1), 
+                              breaks = c(0, 0.5, 1), guide = "none") + 
+        scale_y_continuous(limits = c(-14.28128, -14.22946), "") +
+        scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
+        theme_minimal(base_size = 10) + 
+        coord_sf(crs = 4326)
+      
+      combined_plot <- p1 + p2
+      
+      ggsave(plot = combined_plot,
+             filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", "surveypoints.png")), 
              width = 18, 
              height = 6,
              limitsize = FALSE,
