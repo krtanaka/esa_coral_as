@@ -107,20 +107,20 @@ run_maxent = function(occ_sf, env, survey) {
       "jackknife=true"
     )
     
-    # Run MaxEnt SDM
-    sp_maxent_model <- dismo::maxent(
-      x = env,
-      p = as.matrix(occ_sp),
-      args = maxent_args,
-      removeDuplicates = T
-    )
+    # # Run MaxEnt SDM
+    # sp_maxent_model <- dismo::maxent(
+    #   x = env,
+    #   p = as.matrix(occ_sp),
+    #   args = maxent_args,
+    #   removeDuplicates = T
+    # )
     
-    # # Run MaXent SDM
-    # sp_maxent_model = dismo::maxent(env,
-    #                                 as.matrix(occ_sp),
-    #                                 features = maxent_feats,
-    #                                 betamultiplier = maxent_rm,
-    #                                 removeDuplicates = T)
+    # Run MaXent SDM
+    sp_maxent_model = dismo::maxent(env,
+                                    as.matrix(occ_sp),
+                                    features = maxent_feats,
+                                    betamultiplier = maxent_rm,
+                                    removeDuplicates = T)
     
     # Store maxent model
     maxent_result = list(enm = enmeval_df, model = sp_maxent_model)
