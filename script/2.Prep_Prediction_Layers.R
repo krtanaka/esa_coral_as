@@ -5,8 +5,8 @@ library(ggplot2)
 rm(list = ls())
 select = dplyr::select
 
-# df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
-df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
 # df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
@@ -60,6 +60,7 @@ names(df) <- gsub(".tif", "", names(df)); names(df)
 names(df) <- gsub(".nc", "", names(df)); names(df)
 
 names(df) <- gsub("diste.from.port.v20201104f", "distance.from.port", names(df)); names(df)
+names(df) <- gsub("diste.from.shore", "distance.from.shore", names(df)); names(df)
 names(df) <- gsub("gpw_v4_population_density_rev11_2pt5_min", "population_density", names(df)); names(df)
 names(df) <- gsub("sed_export", "sedimentation", names(df)); names(df)
 
@@ -71,7 +72,7 @@ names(df) <- gsub("_crw_", "_", names(df)); names(df)
 names(df) <- gsub("_noaa_", "_", names(df)); names(df)
 names(df) <- gsub("_yr01", "", names(df)); names(df)
 
-# df <- df %>% mutate(bathymetry = ifelse(bathymetry <= -30, NA, bathymetry))
+df <- df %>% mutate(bathymetry = ifelse(bathymetry <= -30, NA, bathymetry))
 df <- df %>% filter(!is.na(sedimentation))
 df <- df %>% filter(!is.na(bathymetry))
 df <- df %>% filter(!is.na(population_density))
@@ -185,7 +186,7 @@ df <- df %>% select(where(~ n_distinct(.) > 1)); names(df)
 
 # Define the columns to keep in a specific order
 key_columns <- c("lon", "lat", "year", "month", "day", "bathymetry", 
-                 "distance.from.port", "population_density", "sedimentation")
+                 "distance.from.port", "distance.from.shore", "population_density", "sedimentation")
 
 # Get the rest of the columns, sorted alphabetically
 other_columns <- setdiff(names(df), key_columns) %>% sort()
@@ -199,7 +200,6 @@ names(df)
 visdat::vis_miss(df, warn_large_data = F)
 
 # rastertize for maxent 
-
 eds <- rast()
 
 for (v in 6:ncol(df)) {
@@ -223,21 +223,24 @@ for (v in 6:ncol(df)) {
 
 plot(eds)
 
-# Subset environmental data based on VIF results
-load("output/vif.RData")
-eds <- raster::subset(eds, v@results$Variables)
-names(eds)
+# Run VIF step for variable selection
+# v <- usdm::vifstep(terra::rast(eds), th = 3)
+# v <- usdm::vifstep(eds, th = 5)
+# save(v, file = "output/vif.RData")
+# load("output/vif.RData")
+# eds <- raster::subset(eds, v@results$Variables)
+# names(eds)
 
-eds = raster::stack(eds)
-eds = raster::readAll(eds)
-save(eds, file = "data/eds.rdata")
+# eds = raster::stack(eds)
+# eds = raster::readAll(eds)
+# save(eds, file = "data/eds.rdata")
 
 #interpolate to 5m
-load("data/tutuila_hybrid_5m_bathymetry.rdata")
+# load("data/tutuila_hybrid_5m_bathymetry.rdata")
 load("data/tutuila_hybrid_10m_bathymetry.rdata")
 
 # Convert RasterStack to SpatRaster
-# eds_terra <- rast(eds)
+eds_terra <- rast(eds)
 eds_terra <- eds
 df_terra <- rast(df)
 
@@ -283,8 +286,8 @@ eds = c(df_terra, eds_clipped_stack)
 
 # Run VIF step for variable selection
 # note, this VIF selection was done at EDS outputs resolution : 0.005, 0.005
-# v <- usdm::vifstep(terra::rast(eds), th = 3)
-v <- usdm::vifstep(eds, th = 3)
+v <- usdm::vifstep(terra::rast(eds), th = 5)
+v <- usdm::vifstep(eds, th = 5)
 save(v, file = "output/vif.RData")
 load("output/vif.RData")
 
