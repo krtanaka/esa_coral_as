@@ -1,6 +1,6 @@
-install.packages("DiagrammeR")
-install.packages("DiagrammeRsvg")
-install.packages("rsvg")
+# install.packages("DiagrammeR")
+# install.packages("DiagrammeRsvg")
+# install.packages("rsvg")
 
 library(DiagrammeR)
 library(DiagrammeRsvg)
@@ -24,4 +24,4 @@ digraph G {
 
 g <- grViz(diagram_code)
 svg_code <- export_svg(g)
-rsvg_png(charToRaw(svg_code), file = "/Users/Kisei.Tanaka/Desktop/flowchart.png")
+rsvg_png(charToRaw(svg_code), file = "output/flowchart.png", width = 500)
