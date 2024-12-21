@@ -5,8 +5,8 @@ library(ggplot2)
 rm(list = ls())
 select = dplyr::select
 
-df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
-# df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
 # df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
