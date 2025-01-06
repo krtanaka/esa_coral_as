@@ -25,13 +25,44 @@ run_maxent = function(occ_sf, env, survey) {
     
     # plot(env[["bathymetry"]]); points(occ_sp, col='red', pch = 20) # Plot the first environmental layer
     
+    # enmeval_results <- tryCatch({
+    #   
+    #   # Try block partitioning first
+    #   ENMevaluate(occ_sp, env,
+    #               bg = NULL,
+    #               tune.args = list(fc = c("L", "LQ", "H", "LQH", "LQHP", "LQHPT"), rm = 1:5),
+    #               partitions = "block",
+    #               algorithm = "maxnet",
+    #               parallel = TRUE,
+    #               numCores = detectCores() / 2,
+    #               updateProgress = TRUE,
+    #               taxon.name = sp)
+    #   
+    # }, error = function(e) {
+    #   
+    #   cat("Error in block partitioning: ", e$message, "\nTrying random k-fold partitioning...\n")
+    #   closeAllConnections()
+    #   
+    #   # If block partitioning fails, try random k-fold partitioning
+    #   ENMevaluate(occ_sp, env,
+    #               bg = NULL,
+    #               tune.args = list(fc = c("L", "LQ", "H", "LQH", "LQHP", "LQHPT"), rm = 1:5),
+    #               partitions = "randomkfold",
+    #               partition.settings = list(kfolds = 5),
+    #               algorithm = "maxnet",
+    #               parallel = TRUE,
+    #               numCores = detectCores() / 2,
+    #               updateProgress = TRUE,
+    #               taxon.name = sp)
+    # })
+    
     enmeval_results <- tryCatch({
       
-      # Try block partitioning first
       ENMevaluate(occ_sp, env,
                   bg = NULL,
                   tune.args = list(fc = c("L", "LQ", "H", "LQH", "LQHP", "LQHPT"), rm = 1:5),
-                  partitions = "block",
+                  partitions = "randomkfold",
+                  partition.settings = list(kfolds = 5),
                   algorithm = "maxnet",
                   parallel = TRUE,
                   numCores = detectCores() / 2,
@@ -43,17 +74,6 @@ run_maxent = function(occ_sf, env, survey) {
       cat("Error in block partitioning: ", e$message, "\nTrying random k-fold partitioning...\n")
       closeAllConnections()
       
-      # If block partitioning fails, try random k-fold partitioning
-      ENMevaluate(occ_sp, env,
-                  bg = NULL,
-                  tune.args = list(fc = c("L", "LQ", "H", "LQH", "LQHP", "LQHPT"), rm = 1:5),
-                  partitions = "randomkfold",
-                  partition.settings = list(kfolds = 5),
-                  algorithm = "maxnet",
-                  parallel = TRUE,
-                  numCores = detectCores() / 2,
-                  updateProgress = TRUE,
-                  taxon.name = sp)
     })
     
     enmeval_df = enmeval_results@results
