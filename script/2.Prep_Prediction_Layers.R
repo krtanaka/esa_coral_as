@@ -5,8 +5,8 @@ library(ggplot2)
 rm(list = ls())
 select = dplyr::select
 
-df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
-# df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
+# df <- readRDS("data/eds_grid_100m.rds") %>% filter(unit == "Tutuila")
+df <- readRDS("data/eds_grid_500m.rds") %>% filter(unit == "Tutuila")
 # df <- readRDS("data/eds_grid_1km.rds") %>% filter(unit == "Tutuila")
 
 names(df) <- gsub("Daily", "daily", names(df)); names(df)
@@ -224,8 +224,8 @@ for (v in 6:ncol(df)) {
 plot(eds)
 
 # Run VIF step for variable selection
-v <- usdm::vifstep(terra::rast(eds), th = 3)
-v <- usdm::vifstep(eds, th = 3)
+v <- usdm::vifstep(terra::rast(eds), th = 5)
+v <- usdm::vifstep(eds, th = 5)
 save(v, file = "output/vif.RData")
 load("output/vif.RData")
 eds <- raster::subset(eds, v@results$Variables)
