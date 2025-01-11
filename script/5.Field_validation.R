@@ -2,6 +2,8 @@ library(dismo)  # For working with MaxEnt models
 library(pROC)   # For ROC curves and AUC calculations
 library(PresenceAbsence)  # For confusion matrix and related metrics
 library(ggplot2)
+library(ggmap)
+library(dplyr)
 
 rm(list = ls())
 
@@ -105,7 +107,6 @@ roc_data <- data.frame(
 )
 
 # Plot ROC curve with ggplot
-
 ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
   geom_line() +  # ROC curve line
   geom_abline(linetype = "dashed") +  # Diagonal line for random performance
@@ -123,7 +124,6 @@ ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
     x = "False Positive Rate",
     y = "True Positive Rate"
   ) +
-  # ggdark::dark_theme_minimal(base_size = 15) + 
   theme_classic(base_size = 15) + 
   coord_fixed()
 

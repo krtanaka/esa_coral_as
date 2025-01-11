@@ -4,7 +4,7 @@ run_maxent = function(occ_sf, env, survey) {
   
   # occ_sf = occ_df
   # env = eds
-  # survey = "no_nps"
+  # survey = "combined"
   
   species = unique(occ_sf$Scientific.Name)
   
@@ -56,10 +56,16 @@ run_maxent = function(occ_sf, env, survey) {
     #               taxon.name = sp)
     # })
     
+    # Count valid cells across all env layers
+    env_mask <- calc(env, fun=function(x) all(!is.na(x)))
+    # env_mask is now TRUE for cells with no NAs across all layers, FALSE otherwise
+    cellStats(env_mask, sum)
+
     enmeval_results <- tryCatch({
       
       ENMevaluate(occ_sp, env,
                   bg = NULL,
+                  # n.bg = 5000,
                   tune.args = list(fc = c("L", "LQ", "H", "LQH", "LQHP", "LQHPT"), rm = 1:5),
                   partitions = "randomkfold",
                   partition.settings = list(kfolds = 5),
