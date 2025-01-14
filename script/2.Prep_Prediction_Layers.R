@@ -235,77 +235,82 @@ eds = raster::stack(eds)
 eds = raster::readAll(eds)
 save(eds, file = "data/eds.rdata")
 
-# #interpolate to 5m
-# # load("data/tutuila_hybrid_5m_bathymetry.rdata")
-# load("data/tutuila_hybrid_10m_bathymetry.rdata")
-# 
-# # Convert RasterStack to SpatRaster
-# eds_terra <- rast(eds)
+load("data/eds.rdata")
+
+#interpolate to 5 or 10m, or whatever currently is
+# load("data/tutuila_hybrid_5m_bathymetry.rdata")
+load("data/tutuila_hybrid_10m_bathymetry.rdata")
+
+# Convert RasterStack to SpatRaster
+eds_terra <- rast(eds)
 # eds_terra <- eds
-# df_terra <- rast(df)
-# 
-# rm(eds, df)
-# 
-# # If eds_terra does not have a CRS, assign it (assuming same as df_terra):
-# crs(eds_terra) <- crs(df_terra)
-# 
-# # Initialize an empty SpatRaster to store the processed layers
-# eds_clipped_stack <- rast()
-# 
-# # Loop through each layer in eds_terra
-# for (i in 2:nlyr(eds_terra)) {
-#   
-#   # i = 10
-#   
-#   # Extract single layer
-#   eds_layer <- eds_terra[[i]]
-#   # plot(eds_layer)
-#   
-#   # If needed, reproject (and resample) the layer to match df_terra
-#   # If CRS is the same, this step will just resample to match resolution and extent
-#   eds_layer_projected <- project(eds_layer, df_terra, method = "bilinear")
-#   
-#   # Mask the projected layer using df_terra, retaining only where df_terra is not NA
-#   eds_layer_clipped <- mask(eds_layer_projected, df_terra)
-#   # plot(eds_layer_clipped)
-#   
-#   # Add the processed layer to our output stack
-#   eds_clipped_stack <- c(eds_clipped_stack, eds_layer_clipped)
-#   print(i)
-#   gc()
-#   
-# }
-# 
-# # eds_clipped_stack now contains all layers from eds, 
-# # reprojected/resampled and clipped by df’s NA pattern.
-# plot(eds_clipped_stack)
-# 
-# names(df_terra) = "bathymetry"
-# 
-# eds = c(df_terra, eds_clipped_stack)
-# 
-# # Run VIF step for variable selection
-# # note, this VIF selection was done at EDS outputs resolution : 0.005, 0.005
+df_terra <- rast(df); plot(df_terra)
+df_terra <- rast(eds[[1]]); plot(df_terra)
+
+crs(df_terra) <- "+proj=longlat +datum=WGS84 +no_defs"
+
+rm(eds, df)
+
+# If eds_terra does not have a CRS, assign it (assuming same as df_terra):
+crs(eds_terra) <- crs(df_terra)
+
+# Initialize an empty SpatRaster to store the processed layers
+eds_clipped_stack <- rast()
+
+# Loop through each layer in eds_terra
+for (i in 2:nlyr(eds_terra)) {
+
+  # i = 10
+
+  # Extract single layer
+  eds_layer <- eds_terra[[i]]
+  # plot(eds_layer)
+
+  # If needed, reproject (and resample) the layer to match df_terra
+  # If CRS is the same, this step will just resample to match resolution and extent
+  eds_layer_projected <- project(eds_layer, df_terra, method = "cubicspline")
+
+  # Mask the projected layer using df_terra, retaining only where df_terra is not NA
+  eds_layer_clipped <- mask(eds_layer_projected, df_terra)
+  # plot(eds_layer_clipped)
+
+  # Add the processed layer to our output stack
+  eds_clipped_stack <- c(eds_clipped_stack, eds_layer_clipped)
+  print(i)
+  gc()
+
+}
+
+# eds_clipped_stack now contains all layers from eds,
+# reprojected/resampled and clipped by df’s NA pattern.
+plot(eds_clipped_stack)
+
+names(df_terra) = "bathymetry"
+
+eds = c(df_terra, eds_clipped_stack)
+
+# Run VIF step for variable selection
+# note, this VIF selection was done at EDS outputs resolution : 0.005, 0.005
 # v <- usdm::vifstep(terra::rast(eds), th = 5)
 # v <- usdm::vifstep(eds, th = 5)
 # save(v, file = "output/vif.RData")
 # load("output/vif.RData")
-# 
-# # Subset environmental data based on VIF results
+
+# Subset environmental data based on VIF results
 # eds <- raster::subset(eds, v@results$Variables)
-# names(eds)
-# 
-# # Plot the environmental data
-# plot(eds, col = colorRamps::matlab.like(100))
-# 
-# eds = raster::stack(eds)
-# eds = raster::readAll(eds)
-# 
-# save(eds, file = "data/eds.rdata")
-# 
-# # for Kira's environmental layer maps 0-18m
-# eds[["bathymetry"]][eds[["bathymetry"]] <= -18] <- NA
-# eds <- mask(eds, eds[["bathymetry"]])
-# plot(eds)
-# eds = raster::readAll(eds)
-# save(eds, file = "/Users/Kisei.Tanaka/Desktop/eds.rdata")
+names(eds)
+
+# Plot the environmental data
+plot(eds, col = colorRamps::matlab.like(100))
+
+eds = raster::stack(eds)
+eds = raster::readAll(eds)
+
+save(eds, file = "data/eds.rdata")
+
+# for Kira's environmental layer maps 0-18m
+eds[["bathymetry"]][eds[["bathymetry"]] <= -18] <- NA
+eds <- mask(eds, eds[["bathymetry"]])
+plot(eds)
+eds = raster::readAll(eds)
+save(eds, file = "/Users/Kisei.Tanaka/Desktop/eds.rdata")
