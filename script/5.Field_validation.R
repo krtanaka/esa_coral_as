@@ -7,7 +7,7 @@ library(dplyr)
 
 rm(list = ls())
 
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 load(paste0("output/maxent_raster_", species, "_ncrmp.rdata"))
 # load(paste0("output/maxent_raster_", species, "_no_nps.rdata"))
 # load(paste0("output/maxent_raster_", species, "_combined.rdata"))

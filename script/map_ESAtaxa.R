@@ -24,7 +24,7 @@ for (s in sp_list) {
   latin = ifelse(s == "I_craterformis", "Isopora crateriformis", "Acropora globiceps")
   
   # Read in data for each species
-  df = read.csv(paste0("data/", s, "_AS.csv"))
+  df = read.csv(paste0("data/original_data/", s, "_AS.csv"))
   
   # Create histogram of AdColDen
   hist(df$AdColDen)

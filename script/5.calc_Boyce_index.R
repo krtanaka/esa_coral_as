@@ -12,8 +12,6 @@ rm(list = ls())
 
 load("data/eds.rdata")
 
-bathy <- eds[[1]]
-
 presence <- read.csv("data/original_data/crag_isopora_occurences.csv")
 
 coordinates_df <- presence %>%
@@ -28,7 +26,7 @@ prediction <- predict(maxent_result$model, predictors)
 prediction <- rast(prediction)
 
 plot(prediction , col = matlab.like(100))
-points(presence$longitude, presence$latitude, col = 2, pch = 20)
+points(presence$longitude, presence$latitude, col = 2, pch = 20, cex = 3)
 
 # Extract predicted values at presence locations
 # Ensure 'presence' is a 'SpatVector' with the correct CRS
@@ -47,7 +45,7 @@ all_values <- all_values[!is.na(all_values)]
 # Summary of predicted values at presence locations
 summary(pres_values)
 
-# Summary of all predicted values in Hawaii
+# Summary of all predicted values
 summary(all_values)
 
 # Calculate the Boyce Index
@@ -132,13 +130,60 @@ rbind(all_df, pres_df) %>%
     x = "Normalized Suitability",
     y = "Frequency"
   ) +
-  ggdark::dark_theme_minimal() +
+  # ggdark::dark_theme_minimal() +
   theme(
     legend.title = element_blank(),
     legend.position = "top"
   )
 
+library(dplyr)
+library(ggplot2)
 
+# Assuming `all_df` and `pres_df` each have a 'Suitability' column
+# and some column (e.g. 'Data') that distinguishes them.
+
+all_df <- all_df %>%
+  mutate(Data = "All Predicted Values")
+
+pres_df <- pres_df %>%
+  mutate(Data = "Presence Locations")
+
+ggplot() +
+  # 2) Histogram for all predicted values
+  geom_histogram(
+    data  = all_df,
+    aes(x = Suitability, fill = Data),
+    bins  = 50,
+    alpha = 0.6,
+    color = "black"
+  ) +
+  # 3) Dotplot for presence locations, using a star shape
+  geom_dotplot(
+    data       = pres_df,
+    aes(x      = Suitability, fill = Data),
+    binwidth   = 0.02,    # adjust if needed
+    stackgroups= TRUE,
+    stackratio = 1.2,
+    dotsize    = 0.7,
+    shape      = 8        # shape 8 is a star
+  ) +
+  # 4) Manually set fill colors for the legend
+  scale_fill_manual(
+    name   = "",
+    values = c(
+      "All Predicted Values" = "#1f77b4",
+      "Presence Locations"   = "#ff7f0e"
+    )
+  ) +
+  labs(
+    title = "Comparison of Suitability Scores",
+    x     = "Normalized Suitability",
+    y     = "Frequency"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top"
+  )
 
 boyce_results_df <- boyce_results_df %>%
   mutate(mean_boyce = mean(Boyce_Index, na.rm = TRUE),
@@ -154,7 +199,7 @@ ggplot(boyce_results_df, aes(x = species, y = Boyce_Index, fill = mean_boyce)) +
     fill = "Mean Boyce Index"
   ) +
   scale_fill_gradient(low = "blue", high = "red") + 
-  scale_y_continuous(limits = c(-1, 1)) + 
+  # scale_y_continuous(limits = c(-1, 1)) + 
   theme_classic() + 
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate species names for readability
