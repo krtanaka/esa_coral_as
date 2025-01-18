@@ -25,8 +25,35 @@ load(paste0("output/maxent_result_Isopora crateriformis_combined.rda"))
 prediction <- predict(maxent_result$model, predictors)
 prediction <- rast(prediction)
 
-plot(prediction , col = matlab.like(100))
-points(presence$longitude, presence$latitude, col = 2, pch = 20, cex = 3)
+pred_df <- as.data.frame(prediction, xy = TRUE)
+
+ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
+
+map = ggmap::get_map(location = c(mean(pred_df$x), mean(pred_df$y)),
+                     maptype = "satellite",
+                     zoom = 11,
+                     # color = "bw",
+                     force = TRUE)
+
+ggmap(map) +
+  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer)) +
+  scale_fill_viridis_c() +  
+  geom_point(data = presence, aes(x = longitude, y = latitude), color = "red", size = 5, shape = 18) +
+  coord_fixed(xlim = c(-170.66, -170.5536), ylim = c(-14.33, -14.24124)) +
+  labs(
+       fill = "Predicted Habitat Suitability",
+       x = "Longitude",
+       y = "Latitude")
+
+ggmap(map) +
+  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer)) +
+  scale_fill_viridis_c() +  
+  geom_point(data = presence, aes(x = longitude, y = latitude), color = "red", size = 5, shape = 18) +
+  coord_fixed(xlim = c(-170.85, -170.75), ylim = c(-14.375, -14.3)) +
+  labs(
+    fill = "Predicted Habitat Suitability",
+    x = "Longitude",
+    y = "Latitude")
 
 # Extract predicted values at presence locations
 # Ensure 'presence' is a 'SpatVector' with the correct CRS
