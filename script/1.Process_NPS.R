@@ -59,6 +59,9 @@ for (s in 1:length(species_list)) {
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
     scale_y_continuous(limits =  range(dfi$Latitude), name = NULL) +
     scale_x_continuous(limits =  range(dfi$Longitude), name = NULL) +
+    annotate("text", x = -170.7243 , y = -14.22946 , 
+             label = paste0(species, "\n2007-2019\nSource: NPS\nn = ", sum_p), 
+             hjust = 0, vjust = 1, size = 6, color = "white", fontface = "bold") + 
     theme(
       legend.position = c(0.92, 0.22),
       legend.background = element_blank(),             # Transparent background
@@ -67,6 +70,6 @@ for (s in 1:length(species_list)) {
       legend.title = element_text(color = "white", face = "bold")
     )
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_nps.png"), height = 6)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_nps.png"), height = 6, width = 8)
   
 }

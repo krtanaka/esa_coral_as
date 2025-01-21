@@ -81,6 +81,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"), 
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_ncrmp_exp.png"), width = 8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_ncrmp_exp.png"),  width = 9, height = 4.8)
   
 }

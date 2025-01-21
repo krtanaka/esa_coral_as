@@ -163,7 +163,7 @@ for (s in 1:length(species_list)) {
     facet_wrap(~Source, ncol = 1, labeller = labeller(Source = facet_labels)) +
     theme(legend.position = "bottom")
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_global.png"), width = 10)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_global.png"), width = 9, height = 4.8)
   
   ggmap(map) +
     geom_spatial_point(data = df, 
@@ -185,7 +185,7 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"),
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_local.png"), width = 8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_gbif_obis_local.png"), width = 9, height = 4.8)
   
   readr::write_csv(df, file = paste0("data/occurances_", species, "_gbif_obis.csv"))
   
