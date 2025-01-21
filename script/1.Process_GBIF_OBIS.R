@@ -50,6 +50,9 @@ for (s in 1:length(species_list)) {
     pred("taxonKey", taxonkey),
     pred("hasCoordinate", TRUE), 
     pred("hasGeospatialIssue", FALSE), # remove GBIF default geospatial issues
+    user = "krtanaka",
+    pwd = "Nereus0406!",
+    email = "kisei.tanaka@noaa.gov",
     format = "SIMPLE_CSV") 
   
   occ_download_wait(gbif_download) 
