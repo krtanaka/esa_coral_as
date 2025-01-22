@@ -7,7 +7,7 @@ library(dplyr)
 
 rm(list = ls())
 
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species <- c("Acropora globiceps", "Isopora crateriformis")[1]
 load(paste0("output/maxent_raster_", species, "_ncrmp.rdata"))
 # load(paste0("output/maxent_raster_", species, "_no_nps.rdata"))
 # load(paste0("output/maxent_raster_", species, "_combined.rdata"))
@@ -176,4 +176,4 @@ ggplot(confusion_matrix_df, aes(x = as.factor(Prediction), y = as.factor(Referen
   theme_minimal(base_size = 15) + 
   theme(panel.grid.major = element_blank())
 
-ggsave(last_plot(), file = paste0("output/confusion_", species, ".png"), height = 5, bg = "transparent")
+ggsave(last_plot(), file = paste0("output/confusion_", species, ".png"), height = 5, width = 5, bg = "transparent")

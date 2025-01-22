@@ -21,7 +21,7 @@ load("data/eds.rdata")
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
+species_list <- c("Acropora globiceps", "Isopora crateriformis")[2]
 survey_list <- c("ncrmp", "combined", "no_nps")
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
@@ -265,14 +265,14 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
-             width = 13, 
-             height = 6,
+             width = 15.5, 
+             height = 5,
              limitsize = FALSE,
              bg = "transparent")
       
       p1 = ggmap(map1) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 2, alpha = 0.9) + 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 2, alpha = 0.5) + 
         annotate("text", x = -170.85, y = -14.22,
                  label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
                  hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
@@ -298,7 +298,7 @@ for (species in species_list) {
       
       p2 = ggmap(map2) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", size = 3, alpha = 0.9) + 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "orange", size = 3, alpha = 0.5) + 
         scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
                              breaks = c(0, 0.5, 1), guide = "none") + 
         scale_color_gradientn(colors = matlab.like(100), limits = c(0,1), 
@@ -312,7 +312,8 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", "surveypoints.png")), 
-             width = 9, height = 4.8,
+             width = 15.5, 
+             height = 5,
              limitsize = FALSE,
              bg = "transparent")
       
