@@ -38,7 +38,7 @@ source("script/functions.R")
 load("data/eds.rdata")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
 survey <- c("ncrmp", "combined", "no_nps")[2]
 
 # Load NCRMP occurrences
@@ -77,8 +77,8 @@ occ_df <- bind_rows(data_list) %>%
   filter(Latitude >= -14.38, Latitude <= -14.22,
          Longitude >= -170.85, Longitude <= -170.53)
 
-plot(occ_df$Longitude, occ_df$Latitude)
-maps::map(add = T)
+# plot(occ_df$Longitude, occ_df$Latitude)
+# maps::map(add = T)
 
 # Check the number of occurrences for each species
 table(occ_df$Scientific.Name)
