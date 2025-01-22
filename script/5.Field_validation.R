@@ -7,7 +7,7 @@ library(dplyr)
 
 rm(list = ls())
 
-species <- c("Acropora globiceps", "Isopora crateriformis")[1]
+species <- c("Acropora globiceps", "Isopora crateriformis")[2]
 load(paste0("output/maxent_raster_", species, "_ncrmp.rdata"))
 # load(paste0("output/maxent_raster_", species, "_no_nps.rdata"))
 # load(paste0("output/maxent_raster_", species, "_combined.rdata"))
@@ -128,7 +128,7 @@ ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
   coord_fixed()
 
 # Save the plot with a transparent background
-ggsave(last_plot(), file = paste0("output/roc_", species, ".png"), height = 5, bg = "transparent")
+ggsave(last_plot(), file = paste0("output/roc_", species, ".png"), height = 5, width = 5, bg = "transparent")
 
 # Define a threshold (e.g., 0.5) to classify presence/absence
 threshold <- 0.5

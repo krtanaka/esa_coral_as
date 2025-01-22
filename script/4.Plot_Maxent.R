@@ -21,7 +21,7 @@ load("data/eds.rdata")
 
 source("script/functions.R")
 
-species_list <- c("Acropora globiceps", "Isopora crateriformis")[2]
+species_list <- c("Acropora globiceps", "Isopora crateriformis")[1]
 survey_list <- c("ncrmp", "combined", "no_nps")
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
@@ -29,13 +29,23 @@ ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 map1 = ggmap::get_map(location = c(-170.705, -14.294),
                       maptype = "satellite",
                       zoom = 11,
-                      # color = "bw",
                       force = T)
 
 map2 = ggmap::get_map(location = c(-170.68846, -14.25177),
                       maptype = "satellite",
                       zoom = 13,
-                      # color = "bw",
+                      force = T)
+
+map3 = ggmap::get_map(location = c(-170.705, -14.294),
+                      maptype = "satellite",
+                      zoom = 11,
+                      color = "bw",
+                      force = T)
+
+map4 = ggmap::get_map(location = c(-170.68846, -14.25177),
+                      maptype = "satellite",
+                      zoom = 13,
+                      color = "bw",
                       force = T)
 
 for (species in species_list) {
@@ -73,7 +83,6 @@ for (species in species_list) {
         labs(x = "log10 Variable Contribution (%)", y = "") +
         geom_point(shape = 21, size = 5, show.legend = FALSE) + 
         scale_x_log10(labels = scales::label_number(), limits = c(0.001, 100)) +
-        # ggdark::dark_theme_classic(base_size = 15) +
         theme_classic(base_size = 20) + 
         scale_fill_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") +
         scale_color_gradientn(colors = colorRamps::matlab.like(100), trans = "log10") +
@@ -250,7 +259,7 @@ for (species in species_list) {
               legend.title = element_text(color = "white", face = "bold")) + 
         coord_sf(crs = 4326)
       
-      p2 = ggmap(map2, darken = c(0.5, "black")) +
+      p2 = ggmap(map2) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer)) +
         scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
                              breaks = c(0, 0.5, 1), guide = "none") + 
@@ -265,22 +274,22 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
-             width = 15.5, 
+             width = 15, 
              height = 5,
              limitsize = FALSE,
              bg = "transparent")
       
-      p1 = ggmap(map1) +
+      p1 = ggmap(map3) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 2, alpha = 0.5) + 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 3, alpha = 0.5) + 
         annotate("text", x = -170.85, y = -14.22,
                  label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
                  hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
-        scale_fill_gradientn(colors = matlab.like(100), "Predicted Habitat Suitability", limits = c(0,1),
+        scale_fill_viridis_c("Predicted Habitat Suitability", limits = c(0,1), option = "magma",
                              breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
                                                                            title.position = "top",
                                                                            barwidth = 9.5, barheight = 1)) +
-        scale_color_gradientn(colors = matlab.like(100), "Predicted Habitat Suitability", limits = c(0,1),
+        scale_color_viridis_c("Predicted Habitat Suitability", limits = c(0,1),
                               breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
                                                                             title.position = "top",
                                                                             barwidth = 9.5, barheight = 1)) +
@@ -296,12 +305,12 @@ for (species in species_list) {
               legend.title = element_text(color = "white", face = "bold")) + 
         coord_sf(crs = 4326)
       
-      p2 = ggmap(map2) +
+      p2 = ggmap(map4) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "orange", size = 3, alpha = 0.5) + 
-        scale_fill_gradientn(colors = matlab.like(100), limits = c(0,1), 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 5, alpha = 0.5) + 
+        scale_fill_viridis_c(limits = c(0,1), option = "magma",
                              breaks = c(0, 0.5, 1), guide = "none") + 
-        scale_color_gradientn(colors = matlab.like(100), limits = c(0,1), 
+        scale_color_viridis_c(limits = c(0,1), option = "magma",
                               breaks = c(0, 0.5, 1), guide = "none") + 
         scale_y_continuous(limits = c(-14.28128, -14.22946), "") +
         scale_x_continuous(limits = c(-170.7243, -170.6528), "") +
@@ -312,12 +321,10 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", "surveypoints.png")), 
-             width = 15.5, 
+             width = 15, 
              height = 5,
              limitsize = FALSE,
              bg = "transparent")
-      
-      ggdark::invert_geom_defaults()
       
     } else {
       
