@@ -38,8 +38,8 @@ source("script/functions.R")
 load("data/eds.rdata")
 
 # Define species list and select the species
-species <- c("Acropora globiceps", "Isopora crateriformis", "Genus Tridacna")[1]
-survey <- c("ncrmp", "combined", "no_nps")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis")[1]
+survey <- c("ncrmp", "combined", "no_nps")[3]
 
 # Load NCRMP occurrences
 ncrmp <- read_csv(paste0("data/occurances_", species, "_ncrmp_exp.csv"))
@@ -52,6 +52,7 @@ file_paths <- switch(survey,
                      combined = list(
                        ncrmp = paste0("data/occurances_", species, "_ncrmp_exp.csv"),
                        gbif = paste0("data/occurances_", species, "_gbif_obis.csv"),
+                       nps = paste0("data/occurances_", species, "_nps.csv"),
                        crag = paste0("data/occurances_", species, "_crag.csv")),
                      
                      no_nps = list(

@@ -312,8 +312,7 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", "surveypoints.png")), 
-             width = 13, 
-             height = 6,
+             width = 9, height = 4.8,
              limitsize = FALSE,
              bg = "transparent")
       
