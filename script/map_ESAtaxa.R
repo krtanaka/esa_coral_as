@@ -6,6 +6,7 @@ library(patchwork)
 library(sf)
 library(ggmap)
 library(tidyr)
+library(ggspatial)
 
 # Clear the environment
 rm(list = ls())
@@ -39,7 +40,8 @@ for (s in sp_list) {
   # Summarize data by lon and lat, calculating the mean of AdColCount
   df = df %>% 
     group_by(lon, lat) %>% 
-    summarise(AdColCount = mean(AdColCount, na.rm = TRUE))
+    summarise(AdColCount = mean(AdColCount, na.rm = TRUE)) %>% 
+    filter(AdColCount > 0)
   
   # Register Google API key (replace with your own API key)
   ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
@@ -60,12 +62,18 @@ for (s in sp_list) {
                        shape = 21, alpha = 0.8, crs = 4326) + 
     annotate("text", x = -170.8375, y = -14.23039, label = latin, 
              hjust = 0, vjust = 1, size = 5, color = "white", fontface = "bold") + 
-    scale_y_continuous(limits = c(-14.37032, -14.23039), "") +
-    scale_x_continuous(limits = c(-170.8375, -170.508), "") +
-    scale_color_gradient(low = "yellow", high = "red", guide = "legend") +  # Define color gradient
-    scale_fill_gradient(low = "yellow", high = "red", guide = "legend") +   # Define fill gradient
+    scale_y_continuous(limits = c(-14.37032, -14.23039), name = NULL) +
+    scale_x_continuous(limits = c(-170.8375, -170.508), name = NULL) +
+    scale_color_gradientn(colors = c("yellow", "orange", "red"), 
+                          values = scales::rescale(c(min(df$AdColCount), 50, max(df$AdColCount))), 
+                          breaks = c(50, 100),  # Adjust breaks to match bins on map
+                          guide = "legend") +
+    scale_fill_gradientn(colors = c("yellow", "orange", "red"), 
+                         values = scales::rescale(c(min(df$AdColCount), 50, max(df$AdColCount))), 
+                         breaks = c(50, 100),  # Adjust breaks to match bins on map
+                         guide = "legend") +
     theme_minimal() + 
-    theme(legend.position = c(0.92, 0.22),
+    theme(legend.position = c(0.8, 0.22),
           legend.background = element_blank(),             # Transparent background
           legend.key = element_rect(colour = NA, fill = NA), # Transparent key background
           legend.text = element_text(color = "white", face = "bold"),  # White and bold text
