@@ -7,6 +7,7 @@ library(dplyr)
 library(terra)
 library(colorRamps)
 library(ggplot2)
+library(ggmap)
 
 rm(list = ls())
 
@@ -32,28 +33,54 @@ ggmap::register_google(key = "AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 map = ggmap::get_map(location = c(mean(pred_df$x), mean(pred_df$y)),
                      maptype = "satellite",
                      zoom = 11,
-                     # color = "bw",
+                     color = "bw",
                      force = TRUE)
 
-ggmap(map) +
+p1 = ggmap(map) +
   geom_raster(data = pred_df, aes(x = x, y = y, fill = layer)) +
-  scale_fill_viridis_c() +  
+  scale_fill_viridis_c() +
   geom_point(data = presence, aes(x = longitude, y = latitude), color = "red", size = 5, shape = 18) +
-  coord_fixed(xlim = c(-170.66, -170.5536), ylim = c(-14.33, -14.24124)) +
-  labs(
-       fill = "Predicted Habitat Suitability",
-       x = "Longitude",
-       y = "Latitude")
-
-ggmap(map) +
-  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer)) +
-  scale_fill_viridis_c() +  
-  geom_point(data = presence, aes(x = longitude, y = latitude), color = "red", size = 5, shape = 18) +
-  coord_fixed(xlim = c(-170.85, -170.75), ylim = c(-14.375, -14.3)) +
+  coord_sf(xlim = c(-170.85, -170.75), ylim = c(-14.375, -14.3), expand = FALSE) +
   labs(
     fill = "Predicted Habitat Suitability",
     x = "Longitude",
-    y = "Latitude")
+    y = "Latitude"
+  ) +
+  theme(
+    legend.position = c(0.2, 0.1),  # Adjust legend position inside the plot
+    legend.direction = "horizontal",  # Horizontal legend
+    legend.background = element_blank(),  # Transparent background
+    legend.text = element_text(color = "white"),  # White legend text
+    legend.title = element_text(color = "white", face = "bold")  # White bold title
+  ) +
+  guides(fill = guide_colorbar(
+    title.position = "top",  # Move title to the top of the legend
+    title.hjust = 0.5       # Center the title horizontally
+  ))
+
+p2 = ggmap(map) +
+  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer)) +
+  scale_fill_viridis_c() +  
+  geom_point(data = presence, aes(x = longitude, y = latitude), color = "red", size = 5, shape = 18) +
+  coord_sf(xlim = c(-170.66, -170.5536), ylim = c(-14.33, -14.24124), expand = FALSE) +
+  labs(
+    fill = "Predicted Habitat Suitability",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  theme(
+    legend.position = c(0.8, 0.1),  # Adjust legend position inside the plot
+    legend.direction = "horizontal",  # Horizontal legend
+    legend.background = element_blank(),  # Transparent background
+    legend.text = element_text(color = "white"),  # White legend text
+    legend.title = element_text(color = "white", face = "bold")  # White bold title
+  ) +
+  guides(fill = guide_colorbar(
+    title.position = "top",  # Move title to the top of the legend
+    title.hjust = 0.5       # Center the title horizontally
+  ))
+
+p1 + p2
 
 # Extract predicted values at presence locations
 # Ensure 'presence' is a 'SpatVector' with the correct CRS
@@ -131,9 +158,19 @@ plot(boyce_result$HS, boyce_result$F.ratio, type = "b", pch = 19, col = "blue",
 # Add a horizontal line at y = 1
 abline(h = 1, lty = 2, col = "red")
 
+data.frame(HS = boyce_result$HS, 
+           Ratio = boyce_result$F.ratio) %>% 
+  ggplot(aes(HS, Ratio, fill = Ratio)) + 
+  geom_line() + 
+  geom_point(shape = 21, size = 5, show.legend = F) + 
+  scale_fill_viridis_c("") + 
+  labs(x = "Habitat Suitability Class Midpoints",
+       y = "Predicted-to-Expected Ratio") +
+  ggtitle("Boyce Index P/E Curve") + 
+  theme_classic()
+
 # P/E Ratio > 1: Indicates that presences are more frequent than expected in those habitat suitability classes.
 # Trend: An increasing P/E ratio with higher suitability classes confirms that higher suitability predictions correspond to higher observed presences.
-
 
 # Output the Boyce Index
 cat("Boyce Index for Hawaii:", boyce_result$cor, "\n")
@@ -148,35 +185,7 @@ pres_df <- data.frame(
   Data = "Presence Locations"
 )
 
-rbind(all_df, pres_df) %>%
-  ggplot(aes(x = Suitability, fill = Data)) +
-  geom_histogram(bins = 50, position = "identity", alpha = 0.6, color = "black") +
-  scale_fill_manual(values = c("All Predicted Values" = "#1f77b4", "Presence Locations" = "#ff7f0e")) +
-  labs(
-    title = "Comparison of Suitability Scores",
-    x = "Normalized Suitability",
-    y = "Frequency"
-  ) +
-  # ggdark::dark_theme_minimal() +
-  theme(
-    legend.title = element_blank(),
-    legend.position = "top"
-  )
-
-library(dplyr)
-library(ggplot2)
-
-# Assuming `all_df` and `pres_df` each have a 'Suitability' column
-# and some column (e.g. 'Data') that distinguishes them.
-
-all_df <- all_df %>%
-  mutate(Data = "All Predicted Values")
-
-pres_df <- pres_df %>%
-  mutate(Data = "Presence Locations")
-
-ggplot() +
-  # 2) Histogram for all predicted values
+p1 = ggplot() +
   geom_histogram(
     data  = all_df,
     aes(x = Suitability, fill = Data),
@@ -184,17 +193,16 @@ ggplot() +
     alpha = 0.6,
     color = "black"
   ) +
-  # 3) Dotplot for presence locations, using a star shape
   geom_dotplot(
     data       = pres_df,
     aes(x      = Suitability, fill = Data),
-    binwidth   = 0.02,    # adjust if needed
+    # binwidth   = 0.02,    # adjust if needed
     stackgroups= TRUE,
     stackratio = 1.2,
-    dotsize    = 0.7,
-    shape      = 8        # shape 8 is a star
+    # dotsize    = 2,
+    alpha = 0.8,
+    shape      = 21        # shape 8 is a star
   ) +
-  # 4) Manually set fill colors for the legend
   scale_fill_manual(
     name   = "",
     values = c(
@@ -203,34 +211,29 @@ ggplot() +
     )
   ) +
   labs(
-    title = "Comparison of Suitability Scores",
-    x     = "Normalized Suitability",
-    y     = "Frequency"
+    x = "Normalized Suitability",
+    y = "Frequency"
   ) +
-  theme_minimal() +
-  theme(
-    legend.position = "top"
-  )
+theme_pubr() + 
+  theme(legend.position = c(0.7, 0.8))
 
 boyce_results_df <- boyce_results_df %>%
   mutate(mean_boyce = mean(Boyce_Index, na.rm = TRUE),
-         species = "isopora_occurences")
+         species = "I.crateriformis")
 
-# Create the boxplot, filling by the mean Boyce Index
-ggplot(boyce_results_df, aes(x = species, y = Boyce_Index, fill = mean_boyce)) +
-  geom_boxplot(show.legend = F) +
-  geom_jitter(shape = 21, size = 5, alpha = 0.5, width = 0.05, height = 0, show.legend = F) +  
+p2 = ggplot(boyce_results_df, aes(x = species, y = Boyce_Index)) +
+  geom_boxplot(aes(fill = mean_boyce), show.legend = F) +
+  geom_jitter(aes(fill = Boyce_Index), shape = 21, size = 5, alpha = 0.5, width = 0.05, height = 0, show.legend = F) +  
   labs(
     x = "",
     y = "Boyce Index",
     fill = "Mean Boyce Index"
   ) +
-  scale_fill_gradient(low = "blue", high = "red") + 
-  # scale_y_continuous(limits = c(-1, 1)) + 
-  theme_classic() + 
+  # scale_y_continuous(limits = c(-1, 1)) +
+  theme_pubr() + 
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate species names for readability
-    legend.position = "right"  # Position the legend for clarity
+    axis.text.x = element_blank(),
   )
 
-ggsave(last_plot(), file = "output/Boyce_Index.png", height = 8)
+p1 + p2
+ggsave(last_plot(), file = "output/Boyce_Index.png", height = 5, width = 8)
