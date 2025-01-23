@@ -7,7 +7,7 @@ library(dplyr)
 
 rm(list = ls())
 
-species <- c("Acropora globiceps", "Isopora crateriformis")[2]
+species <- c("Acropora globiceps", "Isopora crateriformis")[1]
 load(paste0("output/maxent_raster_", species, "_ncrmp.rdata"))
 # load(paste0("output/maxent_raster_", species, "_no_nps.rdata"))
 # load(paste0("output/maxent_raster_", species, "_combined.rdata"))
@@ -48,30 +48,37 @@ map = ggmap::get_map(location = c(mean(validation_data$longitude), mean(validati
                      color = "bw",
                      force = TRUE)
 
-p1 = ggmap(map)+ 
-  geom_point(data = validation_data, aes(longitude, latitude, fill = predicted_suitability, color = predicted_suitability), shape = 21, size = 3, alpha = 0.5) + 
-  geom_point(data = validation_data %>% filter(presence == 1), aes(longitude, latitude), fill = "red", shape = 21, size = 3) + 
-  scale_y_continuous(limits =  range(validation_data$latitude), name = NULL) +
-  scale_x_continuous(limits =  range(validation_data$longitude), name = NULL) +
-  scale_fill_viridis_c("Predicted Habitat Suitability", limits = c(0,1),
-                       breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
-                                                                     title.position = "top",
-                                                                     barwidth = 10, barheight = 0.8)) +
-  scale_color_viridis_c("Predicted Habitat Suitability", limits = c(0,1),
-                        breaks = c(0, 0.5, 1), guide = guide_colorbar(direction = "horizontal",
-                                                                      title.position = "top",
-                                                                      barwidth = 10, barheight = 0.8)) +
+p1 = ggmap(map) + 
+  geom_point(data = validation_data, 
+             aes(longitude, latitude, fill = predicted_suitability), 
+             shape = 21, size = 3, alpha = 0.5) + 
+  geom_point(data = validation_data %>% filter(presence == 1), 
+             aes(longitude, latitude, color = "Observed Presence"), 
+             fill = "red", shape = 21, size = 3) + 
+  scale_y_continuous(limits = range(validation_data$latitude), name = NULL) +
+  scale_x_continuous(limits = range(validation_data$longitude), name = NULL) +
+  scale_fill_viridis_c("Predicted Habitat Suitability", limits = c(0, 1),
+                       breaks = c(0, 0.5, 1), 
+                       guide = guide_colorbar(direction = "horizontal",
+                                              title.position = "top",
+                                              barwidth = 10, barheight = 0.8)) +
+  scale_color_manual(name = "", 
+                     values = c("Observed Presence" = "red")) +
   labs(title = species) +
-  theme(legend.position = c(0.22, 0.9),
-        legend.background = element_blank(), 
-        legend.box.background = element_blank(), 
-        legend.text = element_text(color = "white", size = 10, face = "bold"), 
-        legend.title = element_text(color = "white", face = "bold")) + 
+  theme(
+    legend.position = c(0.22, 0.8), # Position the legends
+    legend.background = element_rect(fill = "transparent"), # Transparent legend background
+    legend.key = element_rect(fill = "transparent", color = NA), # Transparent legend keys
+    legend.box = "vertical", # Stack legends vertically
+    # legend.box.margin = margin(-10, 0, -10, 0), # Adjust margins between legends
+    legend.text = element_text(color = "white", size = 10, face = "bold"), 
+    legend.title = element_text(color = "white", face = "bold")
+  ) + 
   coord_sf(crs = 4326)
 
 ggsave(plot = p1,
        filename =  file.path(paste0("output/maxent_map_", species, "_suitability_extracted.png")), 
-       width = 6, 
+       width = 6.2, 
        height = 4.5,
        limitsize = FALSE,
        bg = "transparent")
@@ -108,15 +115,6 @@ roc_data <- data.frame(
 
 # Plot ROC curve with ggplot
 ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
-  geom_line() +  # ROC curve line
-  geom_abline(linetype = "dashed") +  # Diagonal line for random performance
-  labs(
-    title = paste("ROC Curve (AUC =", round(auc_manual, 2), ")"),
-    x = "False Positive Rate",
-    y = "True Positive Rate"
-  ) + coord_fixed()
-
-ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
   geom_line(size = 1) +  # ROC curve line
   geom_abline(linetype = "dashed") +  # Diagonal line for random performance
   labs(
@@ -124,7 +122,7 @@ ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
     x = "False Positive Rate",
     y = "True Positive Rate"
   ) +
-  theme_classic(base_size = 15) + 
+  theme_pubr(base_size = 15) + 
   coord_fixed()
 
 # Save the plot with a transparent background
