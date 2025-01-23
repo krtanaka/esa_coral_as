@@ -8,6 +8,7 @@ library(terra)
 library(colorRamps)
 library(ggplot2)
 library(ggmap)
+library(patchwork)
 
 rm(list = ls())
 
@@ -37,50 +38,50 @@ map = ggmap::get_map(location = c(mean(pred_df$x), mean(pred_df$y)),
                      force = TRUE)
 
 p1 = ggmap(map) +
-  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer)) +
-  scale_fill_viridis_c() +
-  geom_point(data = presence, aes(x = longitude, y = latitude), color = "red", size = 5, shape = 18) +
-  coord_sf(xlim = c(-170.85, -170.75), ylim = c(-14.375, -14.3), expand = FALSE) +
-  labs(
-    fill = "Predicted Habitat Suitability",
-    x = "Longitude",
-    y = "Latitude"
-  ) +
+  geom_raster(data = pred_df, aes(x, y, fill = layer)) +
+  geom_point(data = presence, aes(longitude, latitude, color = "CRAG observations"), 
+             fill = "red", shape = 21, size = 3) +
+  scale_y_continuous(limits = c(-14.38, -14.22), name = NULL) +
+  scale_x_continuous(limits = c(-170.85, -170.53), name = NULL) +
+  coord_sf(crs = 4326, expand = F) +
+  scale_fill_viridis_c("Predicted Habitat Suitability", 
+                       limits = c(0, 1),
+                       breaks = c(0, 0.5, 1), 
+                       guide = guide_colorbar(direction = "horizontal",
+                                              title.position = "top",
+                                              barwidth = 9, barheight = 1)) +
+  scale_color_manual(name = NULL, 
+                     values = c("CRAG observations" = "red")) +
   theme(
-    legend.position = c(0.2, 0.1),  # Adjust legend position inside the plot
-    legend.direction = "horizontal",  # Horizontal legend
-    legend.background = element_blank(),  # Transparent background
-    legend.text = element_text(color = "white"),  # White legend text
-    legend.title = element_text(color = "white", face = "bold")  # White bold title
-  ) +
-  guides(fill = guide_colorbar(
-    title.position = "top",  # Move title to the top of the legend
-    title.hjust = 0.5       # Center the title horizontally
-  ))
+    legend.position = c(0.15, 0.85), # Top-left corner for legends
+    legend.direction = "horizontal", # Align legends horizontally
+    legend.box = "vertical", # Stack legends
+    legend.background = element_rect(fill = "transparent"), # Transparent background
+    legend.key = element_rect(fill = "transparent", color = NA), # Transparent keys
+    legend.text = element_text(color = "white"), # White text
+    legend.title = element_text(color = "white", face = "bold") # White bold title
+  )
 
 p2 = ggmap(map) +
-  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer)) +
-  scale_fill_viridis_c() +  
-  geom_point(data = presence, aes(x = longitude, y = latitude), color = "red", size = 5, shape = 18) +
-  coord_sf(xlim = c(-170.66, -170.5536), ylim = c(-14.33, -14.24124), expand = FALSE) +
-  labs(
-    fill = "Predicted Habitat Suitability",
-    x = "Longitude",
-    y = "Latitude"
-  ) +
-  theme(
-    legend.position = c(0.8, 0.1),  # Adjust legend position inside the plot
-    legend.direction = "horizontal",  # Horizontal legend
-    legend.background = element_blank(),  # Transparent background
-    legend.text = element_text(color = "white"),  # White legend text
-    legend.title = element_text(color = "white", face = "bold")  # White bold title
-  ) +
-  guides(fill = guide_colorbar(
-    title.position = "top",  # Move title to the top of the legend
-    title.hjust = 0.5       # Center the title horizontally
-  ))
+  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer), alpha = 0.8, show.legend = F) +
+  geom_point(data = presence, aes(x = longitude, y = latitude),fill = "red", shape = 21, size = 5) +
+  coord_sf(xlim = c(-170.85, -170.75), ylim = c(-14.375, -14.3), crs = 4326, expand = F) + 
+  scale_fill_viridis_c() +
+  theme(axis.title = element_blank())
 
-p1 + p2
+p3 = ggmap(map) +
+  geom_raster(data = pred_df, aes(x = x, y = y, fill = layer), alpha = 0.8, show.legend = F) +
+  geom_point(data = presence, aes(x = longitude, y = latitude),fill = "red", shape = 21, size = 5) +
+  coord_sf(xlim = c(-170.66, -170.5536), ylim = c(-14.33, -14.24124), crs = 4326, expand = F) + 
+  scale_fill_viridis_c() +
+  theme(axis.title = element_blank())
+
+ggsave(plot = p1 / (p2 + p3),
+       filename =  file.path(paste0("output/maxent_crag.png")), 
+       width = 9, 
+       height = 13,
+       limitsize = FALSE,
+       bg = "transparent")
 
 # Extract predicted values at presence locations
 # Ensure 'presence' is a 'SpatVector' with the correct CRS
@@ -169,6 +170,13 @@ data.frame(HS = boyce_result$HS,
   ggtitle("Boyce Index P/E Curve") + 
   theme_classic()
 
+ggsave(last_plot(),
+       filename =  file.path(paste0("output/boyce_curve.png")), 
+       width = 3, 
+       height = 3,
+       limitsize = FALSE,
+       bg = "transparent")
+
 # P/E Ratio > 1: Indicates that presences are more frequent than expected in those habitat suitability classes.
 # Trend: An increasing P/E ratio with higher suitability classes confirms that higher suitability predictions correspond to higher observed presences.
 
@@ -215,7 +223,7 @@ p1 = ggplot() +
     y = "Frequency"
   ) +
 theme_pubr() + 
-  theme(legend.position = c(0.7, 0.8))
+  theme(legend.position = c(0.7, 0.9))
 
 boyce_results_df <- boyce_results_df %>%
   mutate(mean_boyce = mean(Boyce_Index, na.rm = TRUE),
@@ -236,4 +244,4 @@ p2 = ggplot(boyce_results_df, aes(x = species, y = Boyce_Index)) +
   )
 
 p1 + p2
-ggsave(last_plot(), file = "output/Boyce_Index.png", height = 5, width = 8)
+ggsave(last_plot(), file = "output/boyce_indices.png", height = 3, width = 6)
