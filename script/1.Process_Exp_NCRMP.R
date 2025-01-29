@@ -66,8 +66,8 @@ for (s in 1:length(species_list)) {
                        shape = 21, crs = 4326, show.legend = F) +
     scale_fill_manual(values = c("absent" = "yellow", "present" = "red")) +  
     scale_color_manual(values = c("absent" = "yellow", "present" = "red")) + 
-    scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.5)) + 
-    scale_size_manual(values = c("absent" = 2, "present" = 4)) + 
+    scale_alpha_manual(values = c("absent" = 0.5, "present" = 0.8)) + 
+    scale_size_manual(values = c("absent" = 2, "present" = 3)) + 
     coord_sf(crs = 4326) + 
     scale_y_continuous(limits = c(-14.38, -14.22), "") +
     scale_x_continuous(limits = c(-170.85, -170.53), "") +
@@ -81,6 +81,6 @@ for (s in 1:length(species_list)) {
           legend.text = element_text(color = "white", face = "bold"), 
           legend.title = element_text(color = "white", face = "bold"))
   
-  ggsave(last_plot(), file = paste0("data/occurances_", species, "_ncrmp_exp.png"),  width = 9, height = 4.8)
+  ggsave(last_plot(), file = paste0("data/occurances_", species, "_ncrmp_exp.png"), width = 9, height = 4.8)
   
 }
