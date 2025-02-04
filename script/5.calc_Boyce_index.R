@@ -172,7 +172,7 @@ data.frame(HS = boyce_result$HS,
 
 ggsave(last_plot(),
        filename =  file.path(paste0("output/boyce_curve.png")), 
-       width = 3, 
+       width = 5, 
        height = 3,
        limitsize = FALSE,
        bg = "transparent")

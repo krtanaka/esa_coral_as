@@ -22,7 +22,7 @@ load("data/eds.rdata")
 source("script/functions.R")
 
 species_list <- c("Acropora globiceps", "Isopora crateriformis")[1]
-survey_list <- c("ncrmp", "combined", "no_nps")
+survey_list <- c("ncrmp", "combined", "no_nps")[2]
 
 ggmap::register_google("AIzaSyDpirvA5gB7bmbEbwB1Pk__6jiV4SXAEcY")
 
@@ -274,14 +274,14 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, ".png")), 
-             width = 15, 
-             height = 5,
+             width = 15.5, 
+             height = 4.9,
              limitsize = FALSE,
              bg = "transparent")
       
       p1 = ggmap(map3) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 3, alpha = 0.5) + 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 2, alpha = 0.8) +
         annotate("text", x = -170.85, y = -14.22,
                  label = paste0(species, "\nAUC = ", auc, "\nsurvey = ", survey),
                  hjust = 0, vjust = 1, size = 4, color = "white", fontface = "bold") +
@@ -307,7 +307,7 @@ for (species in species_list) {
       
       p2 = ggmap(map4) +
         geom_raster(data = r, aes(x = x, y = y, fill = layer), alpha = 0.8) +
-        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 5, alpha = 0.5) + 
+        geom_point(data = occ_df, aes(Longitude, Latitude), fill = "green", color = "green", shape = 21, size = 3, alpha = 0.8) +
         scale_fill_viridis_c(limits = c(0,1), option = "magma",
                              breaks = c(0, 0.5, 1), guide = "none") + 
         scale_color_viridis_c(limits = c(0,1), option = "magma",
@@ -321,8 +321,8 @@ for (species in species_list) {
       
       ggsave(plot = combined_plot,
              filename =  file.path(paste0("output/maxent_map_", species, "_", survey, "_", "surveypoints.png")), 
-             width = 15, 
-             height = 5,
+             width = 15.5, 
+             height = 4.9,
              limitsize = FALSE,
              bg = "transparent")
       

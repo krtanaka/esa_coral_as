@@ -7,7 +7,7 @@ library(dplyr)
 
 rm(list = ls())
 
-species <- c("Acropora globiceps", "Isopora crateriformis")[1]
+species <- c("Acropora globiceps", "Isopora crateriformis")[2]
 load(paste0("output/maxent_raster_", species, "_ncrmp.rdata"))
 # load(paste0("output/maxent_raster_", species, "_no_nps.rdata"))
 # load(paste0("output/maxent_raster_", species, "_combined.rdata"))
@@ -124,6 +124,41 @@ ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
   ) +
   theme_pubr(base_size = 15) + 
   coord_fixed()
+
+# Plot ROC curve with ggplot
+ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
+  geom_line(size = 1) +  # ROC curve line
+  geom_abline(linetype = "dashed") +  # Diagonal line for random performance
+  labs(
+    title = paste(species, "\nROC Curve (AUC =", round(auc_manual, 2), ")"),
+    x = "False Positive Rate",
+    y = "True Positive Rate"
+  ) +
+  theme_pubr(base_size = 15) + 
+  coord_fixed()
+
+ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
+  geom_line(size = 1, color = "white") +  # ROC curve line in white
+  geom_abline(linetype = "dashed", color = "white") +  # Diagonal reference line in white
+  labs(
+    title = paste("ROC Curve (AUC =", round(auc_manual, 2), ")"),
+    x = "False Positive Rate",
+    y = "True Positive Rate"
+  ) +
+  theme_pubr(base_size = 15) + 
+  coord_fixed() +
+  theme(
+    plot.background = element_rect(fill = ggplot2::alpha("black", 0.8), color = NA),  # Transparent black background
+    panel.background = element_rect(fill = ggplot2::alpha("black", 0), color = NA),  # Panel background
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    axis.text = element_text(color = "white"),  # Axis labels in white
+    axis.title = element_text(color = "white"),  # Axis titles in white
+    plot.title = element_text(color = "white"),  # Title in white
+    legend.background = element_rect(fill = "black", color = NA),  # Legend background
+    legend.text = element_text(color = "white"),
+    legend.title = element_text(color = "white")
+  )
 
 # Save the plot with a transparent background
 ggsave(last_plot(), file = paste0("output/roc_", species, ".png"), height = 5, width = 5, bg = "transparent")

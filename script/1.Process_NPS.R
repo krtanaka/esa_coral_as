@@ -54,8 +54,8 @@ for (s in 1:length(species_list)) {
                        shape = 21, crs = 4326, show.legend = FALSE) +
     scale_fill_manual(values = c("absent" = "yellow", "present" = "red")) +  # Set colors
     scale_color_manual(values = c("absent" = "yellow", "present" = "red")) + 
-    scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.9)) +  # Dim absent, full opacity for present
-    scale_size_manual(values = c("absent" = 2, "present" = 4)) +  # Smaller for absent, larger for present
+    scale_alpha_manual(values = c("absent" = 0.4, "present" = 0.8)) + 
+    scale_size_manual(values = c("absent" = 2, "present" = 4)) + 
     coord_sf(crs = 4326) +    # Use coord_sf to address the warning
     scale_y_continuous(limits =  range(dfi$Latitude), name = NULL) +
     scale_x_continuous(limits =  range(dfi$Longitude), name = NULL) +
